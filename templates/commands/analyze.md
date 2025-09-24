@@ -15,29 +15,37 @@ Goal: Identify inconsistencies, duplications, ambiguities, and underspecified it
 
 STRICTLY READ-ONLY: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
 
-Constitution Authority: The project constitution (`/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/analyze`.
+Constitution Authority: The project constitution referenced by `SPEC_KIT_CONFIG.constitution.path` (default `/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/analyze`.
 
 Execution steps:
 
-1. Run `{SCRIPT}` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
+1. Load Spec Kit configuration:
+   - Check for `/.specify.yaml` at the host project root; if it exists, load that file
+   - Otherwise load `/config-default.yaml`
+   - Extract the root `spec-kit` entry and store it as `SPEC_KIT_CONFIG`
+   - Output the resulting `SPEC_KIT_CONFIG` for operator visibility
+
+2. Run `{SCRIPT}` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
    - SPEC = FEATURE_DIR/spec.md
    - PLAN = FEATURE_DIR/plan.md
    - TASKS = FEATURE_DIR/tasks.md
    Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
 
-2. Load artifacts:
+3. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements.
+
+4. Load artifacts:
    - Parse spec.md sections: Overview/Context, Functional Requirements, Non-Functional Requirements, User Stories, Edge Cases (if present).
    - Parse plan.md: Architecture/stack choices, Data Model references, Phases, Technical constraints.
    - Parse tasks.md: Task IDs, descriptions, phase grouping, parallel markers [P], referenced file paths.
-   - Load constitution `/memory/constitution.md` for principle validation.
+   - Use the constitution loaded from `SPEC_KIT_CONFIG.constitution.path` for principle validation.
 
-3. Build internal semantic models:
+5. Build internal semantic models:
    - Requirements inventory: Each functional + non-functional requirement with a stable key (derive slug based on imperative phrase; e.g., "User can upload file" -> `user-can-upload-file`).
    - User story/action inventory.
    - Task coverage mapping: Map each task to one or more requirements or stories (inference by keyword / explicit reference patterns like IDs or key phrases).
    - Constitution rule set: Extract principle names and any MUST/SHOULD normative statements.
 
-4. Detection passes:
+6. Detection passes:
    A. Duplication detection:
       - Identify near-duplicate requirements. Mark lower-quality phrasing for consolidation.
    B. Ambiguity detection:
@@ -60,13 +68,13 @@ Execution steps:
       - Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note).
       - Conflicting requirements (e.g., one requires to use Next.js while other says to use Vue as the framework).
 
-5. Severity assignment heuristic:
+7. Severity assignment heuristic:
    - CRITICAL: Violates constitution MUST, missing core spec artifact, or requirement with zero coverage that blocks baseline functionality.
    - HIGH: Duplicate or conflicting requirement, ambiguous security/performance attribute, untestable acceptance criterion.
    - MEDIUM: Terminology drift, missing non-functional task coverage, underspecified edge case.
    - LOW: Style/wording improvements, minor redundancy not affecting execution order.
 
-6. Produce a Markdown report (no file writes) with sections:
+8. Produce a Markdown report (no file writes) with sections:
 
    ### Specification Analysis Report
    | ID | Category | Severity | Location(s) | Summary | Recommendation |
@@ -87,12 +95,12 @@ Execution steps:
      * Duplication Count
      * Critical Issues Count
 
-7. At end of report, output a concise Next Actions block:
+9. At end of report, output a concise Next Actions block:
    - If CRITICAL issues exist: Recommend resolving before `/implement`.
    - If only LOW/MEDIUM: User may proceed, but provide improvement suggestions.
    - Provide explicit command suggestions: e.g., "Run /specify with refinement", "Run /plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'".
 
-8. Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
+10. Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
 Behavior rules:
 - NEVER modify files.

@@ -45,16 +45,21 @@ $ARGUMENTS
 7. Execute implementation following the task plan:
    - **Phase-by-phase execution**: Complete each phase before moving to the next
    - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together
-   - **Assumption Handling**:
-      - When evaluating possible solutions:
+   - **Deliver full task scope**: Implement each task’s complete, spec-compliant outcome in the current run; do not defer required capabilities (e.g., real persistence) into unstated future work, no hidden follow-up work!
+   - **Sandbox restrictions**: If the security sandbox blocks a required action (e.g., dependency installation because of network limits or permission errors), stop immediately, explain the restriction to the user, and request guidance or approval instead of attempting unsanctioned workarounds.
+   - **Assumption Handling (per-task decisions)**:
+      - All output relating to Assumption Handling must be prefixed with "[ASSUMPTION]".
+      - When evaluating implementation options for an individual task:
          - Every potential solution **MUST** confirm the requirements in spec.md remain fully achievable
          - Do **NOT** weigh time-versus-value trade-offs; operate as an AI with effectively unlimited capacity
-      - If no clear path exists, HALT immediately, seek explicit guidance from the user, and record the clarification in research.md.
-      - Whenever you adopt an assumption, output the reasoning prefixed with "[ASSUMPTION]".
-   - **Plan Deviation**:
-      - Do not deviate from the plan or task intent unless absolutely unavoidable.
-      - If you cannot proceed without a deviation from the plan or task intent, explain the situation to the user and 
-        HALT immediately, seek explicit guidance from the user, and record the clarification in research.md.
+      - If no clear task-level path exists:
+         1. Explain the situation to the user.
+         2. Instruct the user to "Please amend the `research.md` document then re-run the implementation playbook".
+      - Log all decisions under an "Assumption Log" section in the relevant `tasks.md` file, include enough detail to allow future developers to understand the rationale.
+   - **Plan Deviation (task scope changes)**:
+      - All output relating to Plan Deviation must be prefixed with "[PLAN DEVIATION]".
+      - Do not alter the defined tasks or their intent unless absolutely unavoidable.
+      - Deferring scope-critical deliverables for a task (like persistence layers or integrations) counts as a deviation. If you cannot execute the task as written without such a change, explain the situation to the user and HALT immediately, seek explicit guidance from the user, and record the clarification in research.md.
    - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
    - **File-based coordination**: Tasks affecting the same files must run sequentially
    - **Code Quality Gates**: You **MUST** ensure code quality gates are satisfied quickly per task and extensively per phase
@@ -73,14 +78,14 @@ $ARGUMENTS
    - For parallel tasks [P], continue with successful tasks, report failed ones
    - Provide clear error messages with context for debugging
    - Suggest next steps if implementation cannot proceed
-   - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
+   - **IMPORTANT** For completed tasks, make sure to mark the task off as completed ([✓]) in the tasks.md file.
 
 10. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
    - Confirm the implementation follows the technical plan
-   - Report final status with summary of completed work
+   - Report final status with a summary of completed work
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/tasks` first to regenerate the task list.
 

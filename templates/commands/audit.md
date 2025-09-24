@@ -110,22 +110,32 @@ semantics:
 
 8. Run pre-review gates
 
-    - **Context Gate**: required dossier files exist; else → `Blocked: Missing Context`
-    - **Change Intent Gate**: change aligns with POR; else → `Blocked: Scope Mismatch`
-    - **Unknowns Gate**: unresolved `[NEEDS CLARIFICATION: …]` → `Needs Clarification`
-    - **Requirements Coverage Gate**: every `FR-###` in `SPEC_REQUIREMENTS` maps to implementation/test evidence, an
-      explicit finding, or a documented clarification request; otherwise → `Changes Requested` (missing implementation),
-      `Needs Clarification` (ambiguous requirement), or `Blocked: Scope Mismatch` (requirement intentionally deferred)
-    - **Separation of Duties Gate**: author cannot self-approve; emergency bypasses are exceptional and auditable
-    - **Code Owners Gate**: changes under owned paths require owner approval (if CODEOWNERS configured)
-    - **Quality Controls Gate**: linting/typing/formatting/CI guardrails untouched unless explicitly in scope; unexpected
-      changes → `Quality Controls Violation`
-    - **Security & Privacy Gate**: security/privacy checklist attached and applicable items addressed; else →
-      `Security Gate Failure` or `Privacy Gate Failure`
-    - **Supply Chain Gate**: dependency/SBOM/provenance checks enabled per policy (SLSA/CIS posture); else →
-      `Supply Chain Violation`
-    - **TDD Evidence Gate**: tests drive behavior or equivalent rationale; absence → `TDD Violation`
-    - **Environment Gate**: required tooling available; blocked tooling must be resolved before proceeding
+    - **Gate tiering**: Reviews run in iterative loops. Evaluate gates in focused passes so the first audit isolates
+      foundational blockers and later passes layer on nuanced checks.
+    - **Pass 1 – Foundational (first audit loop)**:
+        - **Context Gate**: required dossier files exist; else → `Blocked: Missing Context`
+        - **Change Intent Gate**: change aligns with POR; else → `Blocked: Scope Mismatch`
+        - **Unknowns Gate**: unresolved `[NEEDS CLARIFICATION: …]` → `Needs Clarification`
+        - **Requirements Coverage Gate**: every `FR-###` in `SPEC_REQUIREMENTS` maps to implementation/test evidence, an
+          explicit finding, or a documented clarification request; otherwise → `Changes Requested` (missing implementation),
+          `Needs Clarification` (ambiguous requirement), or `Blocked: Scope Mismatch` (requirement intentionally deferred)
+        - **TDD Evidence Gate**: tests drive behavior or equivalent rationale; absence → `TDD Violation`
+        - **Environment Gate**: required tooling available; blocked tooling must be resolved before proceeding
+    - If any Pass 1 gate fails, stop after logging those findings. Set the current review status to the blocking gate (or
+      `Review Pending` when multiple gates are open) and record in the decision log that Pass 2 gates remain outstanding;
+      instruct the operator to rerun the audit after remediation instead of proceeding to nuanced checks.
+    - **Pass 2 – Risk & controls (subsequent loops)**:
+        - **Separation of Duties Gate**: author cannot self-approve; emergency bypasses are exceptional and auditable
+        - **Code Owners Gate**: changes under owned paths require owner approval (if CODEOWNERS configured)
+        - **Quality Controls Gate**: linting/typing/formatting/CI guardrails untouched unless explicitly in scope;
+          unexpected changes → `Quality Controls Violation`
+        - **Security & Privacy Gate**: security/privacy checklist attached and applicable items addressed; else →
+          `Security Gate Failure` or `Privacy Gate Failure`
+        - **Supply Chain Gate**: dependency/SBOM/provenance checks enabled per policy (SLSA/CIS posture); else →
+          `Supply Chain Violation`
+    - When Pass 2 gates surface issues, capture targeted findings and, if they block approval, pause before entering
+      additional specialized reviews (e.g., accessibility, observability) to keep context focused for the next
+      fix→audit loop.
 
 9. Collect objective evidence
 
@@ -140,6 +150,8 @@ semantics:
 
 10. Analyze implementation changes
 
+    - Defer deeper analysis until Pass 1 gates pass; when foundational blockers exist, summarize their impact and log
+      deferred review dimensions for the next audit iteration instead of generating exhaustive findings.
     - Review diffs/files for compliance with each item in `REVIEW_REQUIREMENTS`
     - For each `FR-###` requirement, trace implementation changes and associated tests; cite concrete files, commands, or
       scenarios that satisfy the requirement, and open findings when evidence is absent or contradictory
@@ -159,6 +171,9 @@ semantics:
       `Approved`, `Changes Requested`, `Blocked: Missing Context`, `Blocked: Scope Mismatch`, `Needs Clarification`,
       `TDD Violation`, `Quality Controls Violation`, `Security Gate Failure`, `Privacy Gate Failure`,
       `Supply Chain Violation`, `Dependency Vulnerabilities`, `Deprecated Dependencies`, `Review Pending`.
+    - When the audit halts after Pass 1 gates, mark the report as partial: set Final Status to the highest-severity
+      blocking gate (or `Review Pending` when awaiting fixes) and add a `Partial coverage` note in Findings and the
+      Decision Log that lists deferred gates (e.g., Security & Privacy Gate) so the next loop resumes there.
     - Complete the **Resolved Scope** section with branch, baseline, diff source, narrative, concrete paths, and
       implementation scope bullets grounded in the analyzed artifacts.
     - In **Findings**, order items from highest to lowest severity and provide the full metadata set for each entry:
@@ -203,8 +218,8 @@ semantics:
 14. **MANDATORY** Archival write-back and task generation
 
     - Reference `FEATURE_DIR` gathered in Step 2.
-    - Review output filing: present the rendered report to the
-      operator, and overwrite (or create) `review.md` inside `FEATURE_DIR` with the contents of the report.
+    - Review output filing: present the rendered report to the operator, and create or amend `review.md` inside
+      `FEATURE_DIR` with the contents of the report.
     - Open `tasks.md` in `FEATURE_DIR` and overwrite or create a **Phase 4.R: Review Follow-Up** section using
       the format defined in `/templates/tasks-template.md` with a new task per finding.
         - Each finding documented in the report must be represented as a new unchecked task in Phase 4.R with the pattern

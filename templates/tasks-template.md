@@ -130,3 +130,11 @@ Task: "Integration test auth in tests/integration/test_auth.py"
 - [ ] Parallel tasks truly independent
 - [ ] Each task specifies exact file path
 - [ ] No task modifies same file as another [P] task
+
+## Assumption Log
+
+- Assumption: User accounts have unique, verified email addresses.
+  Rational: Database schema enforces uniqueness; product requires email verification on signup.
+
+- Assumption: Frontend will always provide the correct CSRF token when submitting forms.
+  Rational: Existing login and signup forms already use CSRF middleware and headers.
