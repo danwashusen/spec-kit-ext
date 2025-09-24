@@ -15,7 +15,7 @@ scripts:
 1. Load feature spec from Input path
    → If not found: ERROR "No feature spec at {path}"
 2. Fill Technical Context (scan for NEEDS CLARIFICATION)
-   → Detect Project Type from context (web=frontend+backend, mobile=app+api)
+   → Detect Project Type from file system structure or context (web=frontend+backend, mobile=app+api)
    → Set Structure Decision based on project type
 3. Fill the Constitution Check section based on the content of the constitution document.
 4. Evaluate Constitution Check section below
@@ -69,8 +69,14 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 ```
-# Option 1: Single project (DEFAULT)
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
 ├── models/
 ├── services/
@@ -82,7 +88,7 @@ tests/
 ├── integration/
 └── unit/
 
-# Option 2: Web application (when "frontend" + "backend" detected)
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
 backend/
 ├── src/
 │   ├── models/
@@ -97,27 +103,24 @@ frontend/
 │   └── services/
 └── tests/
 
-# Option 3: Mobile + API (when "iOS/Android" detected)
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
 api/
 └── [same as backend above]
 
 ios/ or android/
-└── [platform-specific structure]
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Phase 0: Outline & Research
-1. **Append configured Technical Context additions** (if available):
-   - If `SPEC_KIT_CONFIG.plan.technical_context` exists, append entries not already present in Technical Context
-   - Preserve formatting and `[NEEDS CLARIFICATION]` markers so they flow into research tasks
-
-2. **Extract unknowns from Technical Context** above:
+1. **Extract unknowns from Technical Context** above:
    - For each NEEDS CLARIFICATION → research task
    - For each dependency → best practices task
    - For each integration → patterns task
 
-3. **Generate and dispatch research agents**:
+2. **Generate and dispatch research agents**:
    ```
    For each unknown in Technical Context:
      Task: "Research {unknown} for {feature context}"
@@ -125,20 +128,12 @@ ios/ or android/
      Task: "Find best practices for {tech} in {domain}"
    ```
 
-4. **Consolidate findings** in `research.md` using format:
+3. **Consolidate findings** in `research.md` using format:
    - Decision: [what was chosen]
    - Rationale: [why chosen]
    - Alternatives considered: [what else evaluated]
 
-5. **Execute Additional Research instructions (if configured)**:
-   - If `SPEC_KIT_CONFIG.plan.additional_research` exists, run each item as an independent research instruction using the available context (feature spec, constitution, and any plan documents)
-   - Append results to `research.md` under a top-level heading: `## Additional Research`
-   - For each instruction output, derive a clear section heading that summarizes the key subject (do not repeat the instruction verbatim). Use the following format for each section:
-     - `### {Concise Title Derived From Output}`
-     - Summary and details produced by the instruction
-     - References or source notes (if applicable)
-
-**Output**: research.md with all NEEDS CLARIFICATION resolved and (if configured) an "Additional Research" section containing the instruction-driven findings
+**Output**: research.md with all NEEDS CLARIFICATION resolved
 
 ## Phase 1: Design & Contracts
 *Prerequisites: research.md complete*
