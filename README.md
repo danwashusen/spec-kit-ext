@@ -19,11 +19,13 @@
 - [📽️ Video Overview](#️-video-overview)
 - [🤖 Supported AI Agents](#-supported-ai-agents)
 - [🔧 Specify CLI Reference](#-specify-cli-reference)
+ - [🧩 Configuration](#-configuration)
 - [📚 Core philosophy](#-core-philosophy)
 - [🌟 Development phases](#-development-phases)
 - [🎯 Experimental goals](#-experimental-goals)
 - [🔧 Prerequisites](#-prerequisites)
 - [📖 Learn more](#-learn-more)
+- [🛠️ Local Development](docs/local-development.md)
 - [📋 Detailed process](#-detailed-process)
 - [🔍 Troubleshooting](#-troubleshooting)
 - [👥 Maintainers](#-maintainers)
@@ -46,7 +48,7 @@ Choose your preferred installation method:
 Install once and use everywhere:
 
 ```bash
-uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uv tool install specify-cli --from git+https://github.com/danwashusen/spec-kit-ext.git
 ```
 
 Then use the tool directly:
@@ -61,7 +63,7 @@ specify check
 Run directly without installing:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <PROJECT_NAME>
 ```
 
 **Benefits of persistent installation:**
@@ -222,6 +224,37 @@ After running `specify init`, your AI coding agent will have access to these sla
 |------------------|------------------------------------------------------------------------------------------------|
 | `SPECIFY_FEATURE` | Override feature detection for non-Git repositories. Set to the feature directory name (e.g., `001-photo-albums`) to work on a specific feature when not using Git branches.<br/>**Must be set in the context of the agent you're working with prior to using `/plan` or follow-up commands. |
 
+## 🧩 Configuration
+
+Spec Kit supports external configuration used by all slash commands to locate your constitution and any supplemental documents.
+
+- Lookup order:
+  1) `.specify.yaml` at the project root (if present)
+  2) `config-default.yaml` at the project root (fallback)
+- A minimal default is provided in `config-default.yaml` that sets only the constitution path to keep projects zero‑config by default.
+- A commented, full example is included at the top of `config-default.yaml` showing how to wire in architecture documents, front‑end specs, and other references to enrich the workflow. This example is an enhancement/extension and is not required.
+
+What you can configure under the top‑level `spec-kit` key:
+- `constitution.path`: Path to your constitution document
+- `specify.documents`: Documents to inform the `/specify` phase
+- `plan.documents`, `plan.technical_context`, `plan.additional_research`: Inputs to the `/plan` phase
+- `tasks.documents`: Inputs to the `/tasks` phase
+- `implement.documents`: Inputs to the `/implement` phase
+
+Minimal `.specify.yaml` example:
+```yaml
+spec-kit:
+  - constitution:
+      path: "/memory/constitution.md"
+```
+
+Notes:
+- Paths are resolved relative to your repository root.
+- Missing optional files are noted and skipped.
+- Each slash command loads configuration at start and prints the effective `SPEC_KIT_CONFIG` for operator visibility.
+
+For a deeper dive, see docs/configuration.md.
+
 ## 📚 Core philosophy
 
 Spec-Driven Development is a structured process that emphasizes:
@@ -279,6 +312,7 @@ If you encounter issues with an agent, please open an issue so we can refine the
 
 - **[Complete Spec-Driven Development Methodology](./spec-driven.md)** - Deep dive into the full process
 - **[Detailed Walkthrough](#-detailed-process)** - Step-by-step implementation guide
+- **[Local Development Guide](docs/local-development.md)** - Run the CLI from source, editable installs, uvx flows, and using locally built template ZIPs
 
 ---
 

@@ -1,0 +1,6 @@
+---
+# See docs/configuration.md for a full example of this file.
+
+spec-kit:
+  - constitution:
+      path: "/memory/constitution.md"

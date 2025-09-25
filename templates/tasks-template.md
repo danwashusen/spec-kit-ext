@@ -32,9 +32,10 @@
 9. Return: SUCCESS (tasks ready for execution)
 ```
 
-## Format: `[ID] [P?] Description`
+## Format: `STATUS [ID] [P?] Description`
 - **[P]**: Can run in parallel (different files, no dependencies)
 - Include exact file paths in descriptions
+- Status: "[ ]" = task not started, "[✓]" = task completed, "[~]" = task in progress
 
 ## Path Conventions
 - **Single project**: `src/`, `tests/` at repository root
@@ -75,6 +76,10 @@
 - [ ] T021 [P] Update docs/api.md
 - [ ] T022 Remove duplication
 - [ ] T023 Run manual-testing.md
+
+## Phase 4.R: Review Follow-Up (auto-appended per review run)
+- [ ] F001 Finding F001: Constitutional Violation - Console Logging Instead of Structured Logging as described in review.md
+- [ ] F002 Finding F002: Missing Repository Pattern Implementation as described in review.md
 
 ## Dependencies
 - Tests (T004-T007) before implementation (T008-T014)
@@ -125,3 +130,11 @@ Task: "Integration test auth in tests/integration/test_auth.py"
 - [ ] Parallel tasks truly independent
 - [ ] Each task specifies exact file path
 - [ ] No task modifies same file as another [P] task
+
+## Assumption Log
+
+- Assumption: User accounts have unique, verified email addresses.
+  Rational: Database schema enforces uniqueness; product requires email verification on signup.
+
+- Assumption: Frontend will always provide the correct CSRF token when submitting forms.
+  Rational: Existing login and signup forms already use CSRF middleware and headers.

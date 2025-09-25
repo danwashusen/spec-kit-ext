@@ -31,9 +31,9 @@ uvx --from git+https://github.com/github/spec-kit.git specify init --here
 You can proactively specify your AI agent during initialization:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai gemini
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai copilot
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <project_name> --ai claude
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <project_name> --ai gemini
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <project_name> --ai copilot
 ```
 
 ### Specify Script Type (Shell vs PowerShell)
@@ -47,8 +47,8 @@ Auto behavior:
 
 Force a specific script type:
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --script sh
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --script ps
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <project_name> --script sh
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <project_name> --script ps
 ```
 
 ### Ignore Agent Tools Check
@@ -56,8 +56,14 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <project_name
 If you prefer to get the templates without checking for the right tools:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude --ignore-agent-tools
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <project_name> --ai claude --ignore-agent-tools
 ```
+
+### Optional: Configure Spec Kit
+
+Commands load configuration from `.specify.yaml` at the project root when present; otherwise they fallback to `config-default.yaml`. The default file:
+- Activates only a minimal setting (constitution path) to keep initialization zero‑config.
+- Includes a commented full example showing how to reference your architecture docs, front‑end specs, and other materials. This example is optional and not required.
 
 ## Verification
 
