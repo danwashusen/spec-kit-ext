@@ -48,7 +48,7 @@ Choose your preferred installation method:
 Install once and use everywhere:
 
 ```bash
-uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uv tool install specify-cli --from git+https://github.com/danwashusen/spec-kit-ext.git
 ```
 
 Then use the tool directly:
@@ -63,7 +63,7 @@ specify check
 Run directly without installing:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
+SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <PROJECT_NAME>
 ```
 
 **Benefits of persistent installation:**
