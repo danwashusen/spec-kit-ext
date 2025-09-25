@@ -1,11 +1,11 @@
 # Local Development Guide
 
-This guide shows how to iterate on the `specify` CLI locally without publishing a release or committing to `main` first.
+This guide shows how to iterate on the `specify-ext` CLI locally without publishing a release or committing to `main` first.
 
 > Scripts now have both Bash (`.sh`) and PowerShell (`.ps1`) variants. The CLI auto-selects based on OS unless you pass `--script sh|ps`.
 
 ## Development Workflow (Checklist)
-- Test the `specify` CLI flows (`/specify`, `/plan`, `/tasks`) for your changes
+- Test the `specify-ext` CLI flows (`/specify`, `/plan`, `/tasks`) for your changes
 - Verify templates in `templates/` render and behave as expected
 - Test scripts in `scripts/` for both `sh` and `ps` variants where applicable
 - Update `memory/constitution.md` if you changed core process expectations
@@ -47,8 +47,8 @@ source .venv/bin/activate  # or on Windows PowerShell: .venv\Scripts\Activate.ps
 # Install project in editable mode
 uv pip install -e .
 
-# Now 'specify' entrypoint is available
-specify --help
+# Now 'specify-ext' entrypoint is available
+specify-ext --help
 ```
 
 Re-running after code edits requires no reinstall because of editable mode.
@@ -58,7 +58,7 @@ Re-running after code edits requires no reinstall because of editable mode.
 `uvx` can run from a local path (or a Git ref) to simulate user flows:
 
 ```bash
-uvx --from . specify init demo-uvx --ai copilot --ignore-agent-tools --script sh
+uvx --from . specify-ext init demo-uvx --ai copilot --ignore-agent-tools --script sh
 ```
 
 You can also point uvx at a specific branch without merging:
@@ -66,7 +66,7 @@ You can also point uvx at a specific branch without merging:
 ```bash
 # Push your working branch first
 git push origin your-feature-branch
-uvx --from git+https://github.com/github/spec-kit.git@your-feature-branch specify init demo-branch-test --script ps
+uvx --from git+https://github.com/github/spec-kit.git@your-feature-branch specify-ext init demo-branch-test --script ps
 ```
 
 ### 4a. Absolute Path uvx (Run From Anywhere)
@@ -74,21 +74,21 @@ uvx --from git+https://github.com/github/spec-kit.git@your-feature-branch specif
 If you're in another directory, use an absolute path instead of `.`:
 
 ```bash
-uvx --from /mnt/c/GitHub/spec-kit specify --help
-uvx --from /mnt/c/GitHub/spec-kit specify init demo-anywhere --ai copilot --ignore-agent-tools --script sh
+uvx --from /mnt/c/GitHub/spec-kit specify-ext --help
+uvx --from /mnt/c/GitHub/spec-kit specify-ext init demo-anywhere --ai copilot --ignore-agent-tools --script sh
 ```
 
 Set an environment variable for convenience:
 ```bash
 export SPEC_KIT_SRC=/mnt/c/GitHub/spec-kit
-uvx --from "$SPEC_KIT_SRC" specify init demo-env --ai copilot --ignore-agent-tools --script ps
+uvx --from "$SPEC_KIT_SRC" specify-ext init demo-env --ai copilot --ignore-agent-tools --script ps
 ```
 
 (Optional) Define a shell function:
 ```bash
-specify-dev() { uvx --from /mnt/c/GitHub/spec-kit specify "$@"; }
+specify-ext-dev() { uvx --from /mnt/c/GitHub/spec-kit specify-ext "$@"; }
 # Then
-specify-dev --help
+specify-ext-dev --help
 ```
 
 ### 4b. Use Locally Built Templates (No Network)
@@ -120,7 +120,7 @@ AGENTS=claude,cursor SCRIPTS=sh .github/workflows/scripts/create-release-package
 ```bash
 SPECIFY_TEMPLATE_ZIP=/abs/path/spec-kit-template-claude-sh-v0.0.1.zip \
 uvx --refresh --no-cache --from /abs/path/to/spec-kit \
-  specify init --here --ai claude --script sh --ignore-agent-tools
+  specify-ext init --here --ai claude --script sh --ignore-agent-tools
 ```
 
 Notes:
@@ -171,8 +171,8 @@ Or copy only the modified CLI portion if you want a lighter sandbox.
 If you need to bypass TLS validation while experimenting:
 
 ```bash
-specify check --skip-tls
-specify init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
+specify-ext check --skip-tls
+specify-ext init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
 ```
 (Use only for local experimentation.)
 
@@ -181,12 +181,12 @@ specify init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
 | Action | Command |
 |--------|---------|
 | Run CLI directly | `python -m src.specify_cli --help` |
-| Editable install | `uv pip install -e .` then `specify ...` |
-| Local uvx run (repo root) | `uvx --from . specify ...` |
-| Local uvx run (abs path) | `uvx --from /mnt/c/GitHub/spec-kit specify ...` |
-| Git branch uvx | `uvx --from git+URL@branch specify ...` |
+| Editable install | `uv pip install -e .` then `specify-ext ...` |
+| Local uvx run (repo root) | `uvx --from . specify-ext ...` |
+| Local uvx run (abs path) | `uvx --from /mnt/c/GitHub/spec-kit specify-ext ...` |
+| Git branch uvx | `uvx --from git+URL@branch specify-ext ...` |
 | Build wheel | `uv build` |
-| Use locally built template | `SPECIFY_TEMPLATE_ZIP=… uvx --from … specify init …` |
+| Use locally built template | `SPECIFY_TEMPLATE_ZIP=… uvx --from … specify-ext init …` |
 
 ## 11. Cleaning Up
 
@@ -213,7 +213,7 @@ rm -rf .venv dist build *.egg-info
 
 ## 14. Distributing and testing your fork
 
-You can point the CLI at a different GitHub repository (e.g., your fork) for template downloads without changing code. Set these environment variables before running `specify`:
+By default the CLI pulls release assets from `danwashusen/spec-kit-ext`. You can point it at a different GitHub repository (e.g., another fork) for template downloads without changing code. Export these overrides before running `specify-ext`:
 
 - `SPECIFY_REPO_OWNER` — GitHub user/org that owns the repo
 - `SPECIFY_REPO_NAME` — Repository name
@@ -236,7 +236,7 @@ export SPECIFY_REPO_NAME=your-spec-kit-repo
 # Optional if private/rate-limited
 export GH_TOKEN=ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-specify init my-forked-test --ai claude --script sh --ignore-agent-tools
+specify-ext init my-forked-test --ai claude --script sh --ignore-agent-tools
 ```
 
 PowerShell:
@@ -246,7 +246,7 @@ $env:SPECIFY_REPO_NAME = 'your-spec-kit-repo'
 # Optional if private/rate-limited
 $env:GH_TOKEN = 'ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 
-specify init my-forked-test --ai claude --script ps --ignore-agent-tools
+specify-ext init my-forked-test --ai claude --script ps --ignore-agent-tools
 ```
 
 Notes:

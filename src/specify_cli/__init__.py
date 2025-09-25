@@ -13,15 +13,19 @@
 Specify CLI - Setup tool for Specify projects
 
 Usage:
-    uvx specify-cli.py init <project-name>
-    uvx specify-cli.py init .
-    uvx specify-cli.py init --here
+    specify-ext init <project-name>
+    specify-ext init .
+    specify-ext init --here
 
-Or install globally:
-    uv tool install --from specify-cli.py specify-cli
-    specify init <project-name>
-    specify init .
-    specify init --here
+Or run without installing:
+    uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <project-name>
+    uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init --here
+
+Install globally:
+    uv tool install specify-ext-cli --from git+https://github.com/danwashusen/spec-kit-ext.git
+    specify-ext init <project-name>
+    specify-ext init .
+    specify-ext init --here
 """
 
 import os
@@ -337,7 +341,7 @@ def callback(ctx: typer.Context):
     # (help is handled by BannerGroup)
     if ctx.invoked_subcommand is None and "--help" not in sys.argv and "-h" not in sys.argv:
         show_banner()
-        console.print(Align.center("[dim]Run 'specify --help' for usage information[/dim]"))
+        console.print(Align.center("[dim]Run 'specify-ext --help' for usage information[/dim]"))
         console.print()
 
 
@@ -434,8 +438,8 @@ def init_git_repo(project_path: Path, quiet: bool = False) -> bool:
 
 
 def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Tuple[Path, dict]:
-    repo_owner = os.environ.get("SPECIFY_REPO_OWNER") or "github"
-    repo_name = os.environ.get("SPECIFY_REPO_NAME") or "spec-kit"
+    repo_owner = os.environ.get("SPECIFY_REPO_OWNER") or "danwashusen"
+    repo_name = os.environ.get("SPECIFY_REPO_NAME") or "spec-kit-ext"
     if client is None:
         client = httpx.Client(verify=ssl_context)
 
@@ -803,23 +807,23 @@ def init(
     6. Optionally set up AI assistant commands
     
     Examples:
-        specify init my-project
-        specify init my-project --ai claude
-        specify init my-project --ai gemini
-        specify init my-project --ai copilot --no-git
-        specify init my-project --ai cursor
-        specify init my-project --ai qwen
-        specify init my-project --ai opencode
-        specify init my-project --ai codex
-        specify init my-project --ai windsurf
-        specify init my-project --ai auggie
-        specify init --ignore-agent-tools my-project
-        specify init . --ai claude         # Initialize in current directory
-        specify init .                     # Initialize in current directory (interactive AI selection)
-        specify init --here --ai claude    # Alternative syntax for current directory
-        specify init --here --ai codex
-        specify init --here
-        specify init --here --force  # Skip confirmation when current directory not empty
+        specify-ext init my-project
+        specify-ext init my-project --ai claude
+        specify-ext init my-project --ai gemini
+        specify-ext init my-project --ai copilot --no-git
+        specify-ext init my-project --ai cursor
+        specify-ext init my-project --ai qwen
+        specify-ext init my-project --ai opencode
+        specify-ext init my-project --ai codex
+        specify-ext init my-project --ai windsurf
+        specify-ext init my-project --ai auggie
+        specify-ext init --ignore-agent-tools my-project
+        specify-ext init . --ai claude         # Initialize in current directory
+        specify-ext init .                     # Initialize in current directory (interactive AI selection)
+        specify-ext init --here --ai claude    # Alternative syntax for current directory
+        specify-ext init --here --ai codex
+        specify-ext init --here
+        specify-ext init --here --force  # Skip confirmation when current directory not empty
     """
     # Show banner first
     show_banner()
@@ -1110,10 +1114,11 @@ def init(
     console.print(steps_panel)
 
     enhancement_lines = [
-        "Optional commands that you can use for your specs (improve quality & confidence)[/bright_black]",
+        "[bright_black]Optional commands that you can use for your specs (improve quality & confidence)[/bright_black]",
         "",
         f"○ [cyan]/clarify[/] [bright_black](optional)[/bright_black] - Ask structured questions to de-risk ambiguous areas before planning (run before [cyan]/plan[/] if used)",
-        f"○ [cyan]/analyze[/] [bright_black](optional)[/bright_black] - Cross-artifact consistency & alignment report (after [cyan]/tasks[/], before [cyan]/implement[/])"
+        f"○ [cyan]/analyze[/] [bright_black](optional)[/bright_black] - Cross-artifact consistency & alignment report (after [cyan]/tasks[/], before [cyan]/implement[/])",
+        f"○ [cyan]/audit[/] [bright_black](optional)[/bright_black] - Run the governance-focused review playbook to enforce policy and control gates (see templates/commands/audit.md)"
     ]
     enhancements_panel = Panel("\n".join(enhancement_lines), title="Enhancement Commands", border_style="cyan", padding=(1,2))
     console.print()

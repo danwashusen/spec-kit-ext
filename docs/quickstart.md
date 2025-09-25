@@ -2,7 +2,7 @@
 
 This guide will help you get started with Spec-Driven Development using Spec Kit.
 
-> NEW: All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `specify` CLI auto-selects based on OS unless you pass `--script sh|ps`.
+> NEW: All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `specify-ext` CLI auto-selects based on OS unless you pass `--script sh|ps`.
 
 ## The 4-Step Process
 
@@ -11,13 +11,13 @@ This guide will help you get started with Spec-Driven Development using Spec Kit
 Initialize your project depending on the coding agent you're using:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
+uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME>
 ```
 
 Pick script type explicitly (optional):
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --script ps  # Force PowerShell
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --script sh  # Force POSIX shell
+uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME> --script ps  # Force PowerShell
+uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME> --script sh  # Force POSIX shell
 ```
 
 #### Optional: Project configuration

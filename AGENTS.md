@@ -246,7 +246,7 @@ Different agents use different argument placeholders:
 ## Testing New Agent Integration
 
 1. **Build test**: Run package creation script locally
-2. **CLI test**: Test `specify init --ai <agent>` command
+2. **CLI test**: Test `specify-ext init --ai <agent>` command
 3. **File generation**: Verify correct directory structure and files
 4. **Command validation**: Ensure generated commands work with the agent
 5. **Context update**: Test agent context update scripts
@@ -266,6 +266,19 @@ When adding new agents:
 - Ensure compatibility with the Spec-Driven Development process
 - Document any special requirements or limitations
 - Update this guide with lessons learned
+
+## Runtime Conventions
+
+When working with Python:
+
+- Always prefer Python 3 (`python3`) over the deprecated Python 2 (`python`).
+- Do not use `python` (which may be Python 2.x on some systems).
+- Use `/usr/bin/env python3` shebang style for inline execution.
+
+When working with YAML:
+
+- First try `yq eval -o=json <file>` to convert YAML → JSON.
+- If `yq` is not available, then fallback to Python 3 with PyYAML.
 
 ---
 

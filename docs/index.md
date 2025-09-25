@@ -20,7 +20,7 @@ Commands read configuration from `.specify.yaml` at your project root when prese
 - A minimal active config (constitution path) to keep things zero‑config.
 - A commented full example showing how to reference architecture docs, front‑end specs, and other materials to enhance the workflow. This example is optional and not required.
 
-See `config-default.yaml` in the repository root and [Configuration](configuration.md) for details.
+See `config-default.yaml` in the repository root and [Configuration](configuration.md) for a full example and details.
 
 ## Core Philosophy
 

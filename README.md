@@ -18,7 +18,7 @@
 - [⚡ Get started](#-get-started)
 - [📽️ Video Overview](#️-video-overview)
 - [🤖 Supported AI Agents](#-supported-ai-agents)
-- [🔧 Specify CLI Reference](#-specify-cli-reference)
+- [🔧 Specify Ext CLI Reference](#-specify-ext-cli-reference)
  - [🧩 Configuration](#-configuration)
 - [📚 Core philosophy](#-core-philosophy)
 - [🌟 Development phases](#-development-phases)
@@ -35,7 +35,15 @@
 
 ## 🤔 What is Spec-Driven Development?
 
-Spec-Driven Development **flips the script** on traditional software development. For decades, code has been king — specifications were just scaffolding we built and discarded once the "real work" of coding began. Spec-Driven Development changes this: **specifications become executable**, directly generating working implementations rather than just guiding them.
+Spec-Driven Development **flips the script** on traditional software development. Specifications become living assets that drive implementation, making the intent of the system just as important as the code itself.
+
+This fork extends the core Spec Kit philosophy to thrive in complex and brownfield environments. It layers in:
+
+- Richer context loading for the Spec Kit command suite (`/specify`, `/plan`, `/tasks`, `/implement`, etc.) so you can feed in the documents that already describe your system — PRDs, architecture decision records, threat models, runbooks, and more.
+- Project scaffolding tuned for teams with existing estates, where incremental modernization and integration work is the norm.
+- Opinionated defaults that encourage documenting why things exist today before you change them, keeping legacy constraints visible while you plan the future.
+
+Use this extension when you want the structure of Spec Kit but need the flexibility to reason about deeply interconnected systems, historical context, and the real-world artifacts that come with mature products.
 
 ## ⚡ Get started
 
@@ -48,14 +56,14 @@ Choose your preferred installation method:
 Install once and use everywhere:
 
 ```bash
-SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uv tool install specify-cli --from git+https://github.com/danwashusen/spec-kit-ext.git
+uv tool install specify-ext-cli --from git+https://github.com/danwashusen/spec-kit-ext.git
 ```
 
 Then use the tool directly:
 
 ```bash
-specify init <PROJECT_NAME>
-specify check
+specify-ext init <PROJECT_NAME>
+specify-ext check
 ```
 
 #### Option 2: One-time Usage
@@ -63,7 +71,7 @@ specify check
 Run directly without installing:
 
 ```bash
-SPECIFY_REPO_OWNER=danwashusen SPECIFY_REPO_NAME=spec-kit-ext uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify init <PROJECT_NAME>
+uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME>
 ```
 
 **Benefits of persistent installation:**
@@ -137,9 +145,9 @@ Want to see Spec Kit in action? Watch our [video overview](https://www.youtube.c
 | [Roo Code](https://roocode.com/)                          | ✅ |                                                   |
 | [Codex CLI](https://github.com/openai/codex)              | ⚠️ | Codex [does not support](https://github.com/openai/codex/issues/2890) custom arguments for slash commands.  |
 
-## 🔧 Specify CLI Reference
+## 🔧 Specify Ext CLI Reference
 
-The `specify` command supports the following options:
+The `specify-ext` command supports the following options:
 
 ### Commands
 
@@ -148,7 +156,7 @@ The `specify` command supports the following options:
 | `init`      | Initialize a new Specify project from the latest template      |
 | `check`     | Check for installed tools (`git`, `claude`, `gemini`, `code`/`code-insiders`, `cursor-agent`, `windsurf`, `qwen`, `opencode`, `codex`) |
 
-### `specify init` Arguments & Options
+### `specify-ext init` Arguments & Options
 
 | Argument/Option        | Type     | Description                                                                  |
 |------------------------|----------|------------------------------------------------------------------------------|
@@ -167,46 +175,46 @@ The `specify` command supports the following options:
 
 ```bash
 # Basic project initialization
-specify init my-project
+specify-ext init my-project
 
 # Initialize with specific AI assistant
-specify init my-project --ai claude
+specify-ext init my-project --ai claude
 
 # Initialize with Cursor support
-specify init my-project --ai cursor
+specify-ext init my-project --ai cursor
 
 # Initialize with Windsurf support
-specify init my-project --ai windsurf
+specify-ext init my-project --ai windsurf
 
 # Initialize with PowerShell scripts (Windows/cross-platform)
-specify init my-project --ai copilot --script ps
+specify-ext init my-project --ai copilot --script ps
 
 # Initialize in current directory
-specify init . --ai copilot
+specify-ext init . --ai copilot
 # or use the --here flag
-specify init --here --ai copilot
+specify-ext init --here --ai copilot
 
 # Force merge into current (non-empty) directory without confirmation
-specify init . --force --ai copilot
+specify-ext init . --force --ai copilot
 # or 
-specify init --here --force --ai copilot
+specify-ext init --here --force --ai copilot
 
 # Skip git initialization
-specify init my-project --ai gemini --no-git
+specify-ext init my-project --ai gemini --no-git
 
 # Enable debug output for troubleshooting
-specify init my-project --ai claude --debug
+specify-ext init my-project --ai claude --debug
 
 # Use GitHub token for API requests (helpful for corporate environments)
-specify init my-project --ai claude --github-token ghp_your_token_here
+specify-ext init my-project --ai claude --github-token ghp_your_token_here
 
 # Check system requirements
-specify check
+specify-ext check
 ```
 
 ### Available Slash Commands
 
-After running `specify init`, your AI coding agent will have access to these slash commands for structured development:
+After running `specify-ext init`, your AI coding agent will have access to these slash commands for structured development:
 
 | Command         | Description                                                           |
 |-----------------|-----------------------------------------------------------------------|
@@ -324,19 +332,19 @@ If you encounter issues with an agent, please open an issue so we can refine the
 You can use the Specify CLI to bootstrap your project, which will bring in the required artifacts in your environment. Run:
 
 ```bash
-specify init <project_name>
+specify-ext init <project_name>
 ```
 
 Or initialize in the current directory:
 
 ```bash
-specify init .
+specify-ext init .
 # or use the --here flag
-specify init --here
+specify-ext init --here
 # Skip confirmation when the directory already has files
-specify init . --force
+specify-ext init . --force
 # or
-specify init --here --force
+specify-ext init --here --force
 ```
 
 ![Specify CLI bootstrapping a new project in the terminal](./media/specify_cli.gif)
@@ -344,30 +352,30 @@ specify init --here --force
 You will be prompted to select the AI agent you are using. You can also proactively specify it directly in the terminal:
 
 ```bash
-specify init <project_name> --ai claude
-specify init <project_name> --ai gemini
-specify init <project_name> --ai copilot
-specify init <project_name> --ai cursor
-specify init <project_name> --ai qwen
-specify init <project_name> --ai opencode
-specify init <project_name> --ai codex
-specify init <project_name> --ai windsurf
+specify-ext init <project_name> --ai claude
+specify-ext init <project_name> --ai gemini
+specify-ext init <project_name> --ai copilot
+specify-ext init <project_name> --ai cursor
+specify-ext init <project_name> --ai qwen
+specify-ext init <project_name> --ai opencode
+specify-ext init <project_name> --ai codex
+specify-ext init <project_name> --ai windsurf
 # Or in current directory:
-specify init . --ai claude
-specify init . --ai codex
+specify-ext init . --ai claude
+specify-ext init . --ai codex
 # or use --here flag
-specify init --here --ai claude
-specify init --here --ai codex
+specify-ext init --here --ai claude
+specify-ext init --here --ai codex
 # Force merge into a non-empty current directory
-specify init . --force --ai claude
+specify-ext init . --force --ai claude
 # or
-specify init --here --force --ai claude
+specify-ext init --here --force --ai claude
 ```
 
 The CLI will check if you have Claude Code, Gemini CLI, Cursor CLI, Qwen CLI, opencode, or Codex CLI installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
 
 ```bash
-specify init <project_name> --ai claude --ignore-agent-tools
+specify-ext init <project_name> --ai claude --ignore-agent-tools
 ```
 
 ### **STEP 1:** Establish project principles
