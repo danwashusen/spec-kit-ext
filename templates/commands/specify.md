@@ -19,7 +19,6 @@ Given that feature description, do this:
    - Check for `/.specify.yaml` at the host project root; if it exists, load that file
    - Otherwise load `/config-default.yaml`
    - Extract the root `spec-kit` entry and store it as `SPEC_KIT_CONFIG`
-   - Output the resulting `SPEC_KIT_CONFIG` for operator visibility
 
 2. Run the script `{SCRIPT}` from the repo root and parse its JSON output for BRANCH_NAME and SPEC_FILE. All future file paths must be absolute.
   **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for.

@@ -16,7 +16,6 @@ Follow this execution flow:
    - Check for `/.specify.yaml` at the host project root; if it exists, load that file
    - Otherwise load `/config-default.yaml`
    - Extract the root `spec-kit` entry and store it as `SPEC_KIT_CONFIG`
-   - Output the resulting `SPEC_KIT_CONFIG` for operator visibility
 
 2. If defined, read documents from `SPEC_KIT_CONFIG.constitution.documents`:
     - For each item, resolve `path` to an absolute path from the repo root
