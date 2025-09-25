@@ -86,4 +86,6 @@ If critical info missing (e.g., ratification date truly unknown), insert `TODO(<
 
 Do not create a new template; always operate on the existing file at the path specified by `SPEC_KIT_CONFIG.constitution.path`.
 
-Use absolute paths with the repository root for all file operations to avoid path issues.
+Use repository-root anchored paths in generated docs (e.g., `/frontend/src/components/`). Avoid host-specific prefixes
+like `/Users/...` or `/home/...`; treat the repository root as `/` for display. Continue using full absolute paths when
+running shell/file operations.

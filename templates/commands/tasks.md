@@ -91,4 +91,6 @@ Context for task generation: {ARGS}
 
 The tasks.md should be immediately executable - each task must be specific enough that an LLM can complete it without additional context.
 
-Use absolute paths with the repository root for all file operations to avoid path issues.
+Use repository-root anchored paths in generated docs (e.g., `/frontend/src/components/`). Avoid host-specific prefixes
+like `/Users/...` or `/home/...`; treat the repository root as `/` for display. Continue using full absolute paths when
+running shell/file operations.
