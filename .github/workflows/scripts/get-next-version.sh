@@ -5,8 +5,11 @@ set -euo pipefail
 # Calculate the next version based on the latest git tag and output GitHub Actions variables
 # Usage: get-next-version.sh
 
-# Get the latest tag, or use v0.0.0 if no tags exist
-LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+# Get the latest semantic version tag (vX.Y.Z), or use v0.0.0 if none exist
+LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+if [[ -z "$LATEST_TAG" ]]; then
+  LATEST_TAG="v0.0.0"
+fi
 echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
 # Extract version number and increment
