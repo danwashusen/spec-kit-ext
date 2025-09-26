@@ -22,44 +22,97 @@ Commands read configuration from `.specify.yaml` at your project root when prese
 
 See `config-default.yaml` in the repository root and [Configuration](configuration.md) for a full example and details.
 
-## Core Philosophy
+## Commands
 
-Spec-Driven Development is a structured process that emphasizes:
+Every slash command loads configuration (preferring `.specify.yaml`, falling back to `config-default.yaml`), stores it as `SPEC_KIT_CONFIG`, and runs a purpose-built script under `scripts/` to discover feature paths. The sections below summarise what each command actually does based on the command templates in `templates/commands/`.
 
-- **Intent-driven development** where specifications define the "_what_" before the "_how_"
-- **Rich specification creation** using guardrails and organizational principles
-- **Multi-step refinement** rather than one-shot code generation from prompts
-- **Heavy reliance** on advanced AI model capabilities for specification interpretation
+### `/constitution`
 
-## Development Phases
+- **Purpose**: Create or amend the governing constitution referenced by the rest of the workflow.
+- **Configuration**: Reads `SPEC_KIT_CONFIG.constitution.path` and optional `SPEC_KIT_CONFIG.constitution.documents` as supporting material.
+- **Execution highlights** (`templates/commands/constitution.md`):
+  - Loads the existing constitution (if present) plus the canonical template in `/memory/constitution.md`.
+  - Resolves every placeholder token, decides the correct semantic version bump, and enforces ISO dates.
+  - Reviews core templates (`plan-template.md`, `spec-template.md`, `tasks-template.md`) and command files to keep their guidance aligned with the updated principles.
+  - Writes a “Sync Impact Report” HTML comment to the top of the constitution summarising version changes, impacted artefacts, and TODOs.
+- **Outputs**: Updated constitution file at `constitution.path` with all placeholders replaced and dependent-doc alignment checked.
 
-| Phase | Focus | Key Activities |
-|-------|-------|----------------|
-| **0-to-1 Development** ("Greenfield") | Generate from scratch | <ul><li>Start with high-level requirements</li><li>Generate specifications</li><li>Plan implementation steps</li><li>Build production-ready applications</li></ul> |
-| **Creative Exploration** | Parallel implementations | <ul><li>Explore diverse solutions</li><li>Support multiple technology stacks & architectures</li><li>Experiment with UX patterns</li></ul> |
-| **Iterative Enhancement** ("Brownfield") | Brownfield modernization | <ul><li>Add features iteratively</li><li>Modernize legacy systems</li><li>Adapt processes</li></ul> |
+### `/specify`
 
-## Experimental Goals
+- **Purpose**: Bootstrap or revise the feature specification (`spec.md`) for the active feature branch.
+- **Configuration**: Consumes `SPEC_KIT_CONFIG.specify.documents`; also reuses the constitution path for downstream checks.
+- **Execution highlights** (`templates/commands/specify.md`):
+  - Runs `scripts/bash/create-new-feature.sh --json` (or PowerShell equivalent) exactly once to create/locate the feature branch and spec file.
+  - Reads any configured supporting documents before drafting.
+  - Fills `/templates/spec-template.md` with concrete content, ensuring required sections and acceptance checks are populated.
+- **Outputs**: Updated `specs/<feature>/spec.md`, branch metadata, and a readiness report for the next phase.
 
-Our research and experimentation focus on:
+### `/clarify`
 
-### Technology Independence
-- Create applications using diverse technology stacks
-- Validate the hypothesis that Spec-Driven Development is a process not tied to specific technologies, programming languages, or frameworks
+- **Purpose**: Systematically remove ambiguity from `spec.md` before planning.
+- **Configuration**: Uses `SPEC_KIT_CONFIG.plan.documents` for context and the constitution for compliance.
+- **Execution highlights** (`templates/commands/clarify.md`):
+  - Runs `check-prerequisites` to discover `FEATURE_DIR` and required files.
+  - Audits the spec with a taxonomy covering functional scope, data model, UX, NFRs, integrations, constraints, and more.
+  - Asks up to five tightly scoped questions (multiple-choice or short reply), logging each answer under `## Clarifications` → `### Session <date>`.
+  - Applies each answer directly to the relevant section (functional requirements, user stories, NFRs, etc.) and validates that ambiguity is resolved.
+- **Outputs**: Revised `spec.md` with a structured clarifications log and a coverage summary describing remaining gaps or deferrals.
 
-### Enterprise Constraints
-- Demonstrate mission-critical application development
-- Incorporate organizational constraints (cloud providers, tech stacks, engineering practices)
-- Support enterprise design systems and compliance requirements
+### `/plan`
 
-### User-Centric Development
-- Build applications for different user cohorts and preferences
-- Support various development approaches (from vibe-coding to AI-native development)
+- **Purpose**: Produce the detailed implementation plan and design artefacts used by later phases.
+- **Configuration**: Reads `SPEC_KIT_CONFIG.plan.documents`, `plan.technical_context`, `plan.additional_research`, plus the constitution.
+- **Execution highlights** (`templates/commands/plan.md`):
+  - Requires an existing clarifications section or an explicit user override before proceeding.
+  - Runs `setup-plan.sh --json` to gather file paths and copy the plan template into place.
+  - Reads the feature spec, configured documents, and constitution; populates `plan.md` via `/templates/plan-template.md`.
+  - Executes Phase 0 and Phase 1 of the template, generating `research.md`, `data-model.md`, `contracts/`, `quickstart.md`, and any agent-specific files.
+  - Re-validates constitutional gates after design work and stops before task generation (Phase 2 is deferred to `/tasks`).
+- **Outputs**: `plan.md` populated with technical context, progress tracking, and Constitution Check results, plus supporting design artefacts inside `specs/<feature>/`.
 
-### Creative & Iterative Processes
-- Validate the concept of parallel implementation exploration
-- Provide robust iterative feature development workflows
-- Extend processes to handle upgrades and modernization tasks
+### `/tasks`
+
+- **Purpose**: Convert the plan into an executable task list and enrich research context for downstream automation.
+- **Configuration**: Reads `SPEC_KIT_CONFIG.tasks.documents` and the constitution.
+- **Execution highlights** (`templates/commands/tasks.md`):
+  - Uses `check-prerequisites` to load all available design artefacts (plan, research, data model, contracts, quickstart).
+  - Generates `tasks.md` from `/templates/tasks-template.md`, organising work into Setup, Tests, Core, Integration, and Polish phases with dependency notes and `[P]` markers for safe parallelism.
+  - Ensures TDD ordering (tests before implementation) and maps tasks to actual file paths.
+  - Appends a “System Context” and “Codebase Summary” section to `research.md`, capturing insights needed by AI agents during implementation.
+- **Outputs**: Structured `tasks.md` with numbered tasks (T001, T002, …) and updated `research.md` containing system context and codebase overviews.
+
+### `/analyze`
+
+- **Purpose**: Perform a read-only consistency audit across `spec.md`, `plan.md`, and `tasks.md` before coding begins.
+- **Configuration**: Uses `SPEC_KIT_CONFIG.analyze.documents` and the constitution for authoritative checks.
+- **Execution highlights** (`templates/commands/analyze.md`):
+  - Runs `check-prerequisites` with task validation to confirm the required artefacts exist.
+  - Builds semantic inventories for requirements, user stories, tasks, and constitutional rules.
+  - Detects duplication, ambiguity, underspecification, constitution violations, coverage gaps, and terminology drift.
+  - Emits a markdown report featuring a findings table with severity levels, coverage summary, constitution issues, unmapped tasks, and key metrics, then prompts the operator about remediation suggestions.
+- **Outputs**: A structured analysis report (no file writes) highlighting critical issues to resolve before `/implement`.
+
+### `/implement`
+
+- **Purpose**: Execute the task list while respecting dependencies, constitutional constraints, and assumption logging rules.
+- **Configuration**: Reads `SPEC_KIT_CONFIG.implement.documents` and the constitution.
+- **Execution highlights** (`templates/commands/implement.md`):
+  - Loads all plan artefacts plus any configured operational guides.
+  - Parses `tasks.md` into phases, enforcing sequential vs. parallel execution and TDD ordering.
+  - At each decision point, records `[ASSUMPTION]` notes (logged back to `tasks.md`) and halts on unresolvable ambiguities or sandbox restrictions.
+  - Flags scope changes with `[PLAN DEVIATION]`, requires explicit user approval to proceed, and marks completed tasks with `[✓]` directly in `tasks.md`.
+- **Outputs**: Code changes aligned with the plan, updated `tasks.md` reflecting completion status and assumption logs, and console progress reports per task.
+
+### `/audit`
+
+- **Purpose**: Run the governance-heavy review playbook after implementation, ensuring policy gates and quality controls are satisfied.
+- **Configuration**: Consumes `SPEC_KIT_CONFIG.review.documents` alongside the constitution.
+- **Execution highlights** (`templates/commands/audit.md`):
+  - Executes `check-implementation-prerequisites.sh --json` to gather the feature directory and document inventory.
+  - Loads all implementation artefacts (spec, plan, tasks, research, data model, contracts, quickstart) plus review-specific documents and platform controls.
+  - Applies multi-pass review gates (scope reconciliation, quality controls, security/privacy, supply chain), running required quality commands where mandated.
+  - Produces a detailed review report following `/templates/review-template.md`, archives it to `specs/<feature>/review.md`, and injects follow-up tasks into `tasks.md` under **Phase 4.R: Review Follow-Up**.
+- **Outputs**: Governance-aligned `review.md`, augmented `tasks.md` with remediation tasks, and an audit trail of findings and strengths ready for release decisions.
 
 ## Contributing
 
