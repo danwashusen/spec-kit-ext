@@ -27,14 +27,17 @@ Given the implementation details provided as an argument, do this:
    - Success criteria and acceptance criteria
    - Any technical constraints or dependencies mentioned
 
-4. If defined, read documents from `SPEC_KIT_CONFIG.plan.documents`:
+4. If defined, read documents from `SPEC_KIT_CONFIG.plan.documents`, refer to them as the document context:
    - For each item, resolve `path` to an absolute path from the repo root
    - Read the file and consider its `context` to guide planning decisions
    - If a file is missing, note it and continue
+   - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
 
-5. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements.
+5. Read the changelog at the path specified by `SPEC_KIT_CONFIG.changelog.path` and incorporate any relevant historical context or conventions into the planning decisions; if it is missing, note the gap and continue.
 
-6. Execute the implementation plan template:
+6. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements that the planning **MUST** respect.
+
+7. Execute the implementation plan template:
    - Load `/templates/plan-template.md` (already copied to IMPL_PLAN path)
    - Set Input path to FEATURE_SPEC
    - Run the Execution Flow (main) function steps 1-9
@@ -47,12 +50,12 @@ Given the implementation details provided as an argument, do this:
    - Incorporate user-provided details from arguments into Technical Context: {ARGS}
    - Update Progress Tracking as you complete each phase
 
-7. Verify execution completed:
+8. Verify execution completed:
    - Check Progress Tracking shows all phases complete
    - Ensure all required artifacts were generated
    - Confirm no ERROR states in execution
 
-8. Report results with branch name, file paths, and generated artifacts.
+9. Report results with branch name, file paths, and generated artifacts.
 
 Use repository-root anchored paths in generated docs (e.g., `/frontend/src/components/`). Avoid host-specific prefixes
 like `/Users/...` or `/home/...`; treat the repository root as `/` for display. Continue using full absolute paths when

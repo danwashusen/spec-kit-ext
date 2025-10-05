@@ -30,13 +30,22 @@ Execution steps:
    - TASKS = FEATURE_DIR/tasks.md
    Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
 
-3. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements.
+3. If defined, read documents from `SPEC_KIT_CONFIG.analyze.documents`, refer to them as the document context:
+   - For each item, resolve `path` to an absolute path from the repo root
+   - Read the file and consider its `context` to guide analysis
+   - If a file is missing, note it and continue
+   - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
+
+4. Read the changelog at the path specified by `SPEC_KIT_CONFIG.changelog.path` and incorporate any relevant historical context or conventions into the analysis; if it is missing, note the gap and continue.
+
+3. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements that **MUST** be respected.
 
 4. Load artifacts:
    - Parse spec.md sections: Overview/Context, Functional Requirements, Non-Functional Requirements, User Stories, Edge Cases (if present).
    - Parse plan.md: Architecture/stack choices, Data Model references, Phases, Technical constraints.
    - Parse tasks.md: Task IDs, descriptions, phase grouping, parallel markers [P], referenced file paths.
-   - Use the constitution loaded from `SPEC_KIT_CONFIG.constitution.path` for principle validation.
+   - Use the constitution for principle validation.
+   - If `SPEC_KIT_CONFIG.analyze.documents` exists, read each referenced document as supplementary context **only** for this analysis. Use them to clarify ambiguous terminology, confirm domain facts, or surface gaps that should be reflected back into spec/plan/tasks. Do **not** assume downstream commands (e.g., `/implement`) will have access to these files; flag missing details that ought to migrate into the core artifacts instead.
 
 5. Build internal semantic models:
    - Requirements inventory: Each functional + non-functional requirement with a stable key (derive slug based on imperative phrase; e.g., "User can upload file" -> `user-can-upload-file`).
@@ -50,6 +59,7 @@ Execution steps:
    B. Ambiguity detection:
       - Flag vague adjectives (fast, scalable, secure, intuitive, robust) lacking measurable criteria.
       - Flag unresolved placeholders (TODO, TKTK, ???, <placeholder>, etc.).
+      - Use any insights from the supplementary context (pulled from `SPEC_KIT_CONFIG.analyze.documents` when present) to determine when domain terms are defined elsewhere but missing from core artifacts; recommend pulling essential context into spec/plan/tasks.
    C. Underspecification:
       - Requirements with verbs but missing object or measurable outcome.
       - User stories missing acceptance criteria alignment.
@@ -66,6 +76,7 @@ Execution steps:
       - Data entities referenced in plan but absent in spec (or vice versa).
       - Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note).
       - Conflicting requirements (e.g., one requires to use Next.js while other says to use Vue as the framework).
+      - When supplementary documents reveal crucial constraints or definitions that the core artifacts omit, treat it as underspecification/inconsistency and instruct that the core files be updated; do **not** rely on external docs being present during `/implement`.
 
 7. Severity assignment heuristic:
    - CRITICAL: Violates constitution MUST, missing core spec artifact, or requirement with zero coverage that blocks baseline functionality.

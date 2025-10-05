@@ -35,7 +35,7 @@ semantics:
 
 2. Capture prerequisite signals
 
-    - Run `/scripts/bash/check-implementation-prerequisites.sh --json` from the repo root
+    - Run `/scripts/bash/check-prerequisites.sh --json` from the repo root
     - Parse `FEATURE_DIR` and the `AVAILABLE_DOCS` list; all future file paths must be absolute
     - Record sandbox mode, network access, and approval policy before running commands
 
@@ -53,10 +53,11 @@ semantics:
 
 4. Enrich governance context
 
-    - If defined, read documents from `SPEC_KIT_CONFIG.review.documents`
+    - If defined, read documents from `SPEC_KIT_CONFIG.audit.documents`, refer to them as the document context:
         - For each entry, resolve `path` to an absolute path from the repo root
         - Read the file and apply its `context` to guide review heuristics
         - If a document is missing, record it as a risk before continuing
+        - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
     - Read the constitution at `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements
     - Load platform enforcement posture (protected branches, required status checks, approval rules, CODEOWNERS)
 
@@ -66,8 +67,13 @@ semantics:
       `research.md`, and related outputs to gather every directive that states scope, explicit targets, exclusions, focus
       questions, risks, or acceptance gates
     - Assume implementation occurs on a branch named after the feature directory slug (e.g., branch `006-story-2-2`);
-      compare that branch tip to its baseline (`main` unless overridden) to identify the change set under review, and note
-      any caller-provided diff hints or commit ranges
+      gather candidate diff scopes and present them to the operator as a multi-choice prompt. Default to the full feature
+      branch (`HEAD`) against `main`, but also surface:
+        - `HEAD` against `SPEC_KIT_CONFIG.audit.baseline` if provided
+        - Any CLI or environment overrides supplied at invocation time
+        - A manual entry option for custom branch/commit ranges (e.g., `feature..HEAD`, `commitA...commitB`)
+      Capture the operator's selection as `SELECTED_BASELINE` and store supplemental details (custom range notes,
+      rationale) so downstream steps can reference the agreed comparison target
     - Derive concrete scope hints by enumerating file paths, directories, and components referenced within `tasks.md` (task
       descriptions, `[P]` tags, dependency notes) and `plan.md` (project structure decisions); store the consolidated list
       as `REVIEW_SCOPE_HINTS`
@@ -85,6 +91,11 @@ semantics:
 
     - Normalize the scope into concrete path globs or files using the repository root
     - Union multiple hints and record the result as `RESOLVED_SCOPE`
+    - Resolve the comparison baseline using `SELECTED_BASELINE`:
+        - Default to `HEAD` vs `main` when the operator accepts the default
+        - When a different option is chosen (config override, CLI flag, or manual entry), record the explicit refs or
+          commit range as `COMPARISON_TARGET`
+        - Confirm the references exist locally; if missing, pause and request clarification before continuing
     - Verify the paths exist; if not, pause and request clarification
     - When required commands are blocked by sandboxing or policy, request elevation or document the limitation
 
@@ -165,7 +176,7 @@ semantics:
 
 11. Assemble review deliverables
 
-    - Populate `/templates/review-template.md` exactly as structured; the template is the canonical output
+    - Populate `/templates/audit-template.md` exactly as structured; the template is the canonical output
       format.
     - Record the **Final Status** using the defined taxonomy:
       `Approved`, `Changes Requested`, `Blocked: Missing Context`, `Blocked: Scope Mismatch`, `Needs Clarification`,
@@ -178,6 +189,16 @@ semantics:
       implementation scope bullets grounded in the analyzed artifacts.
     - In **Findings**, order items from highest to lowest severity and provide the full metadata set for each entry:
       `category`, `severity`, `confidence`, `impact`, `evidence`, `remediation`, `source_requirement`, `files`.
+    - Render Findings using two subsections in the final report template:
+        - `### Active Findings (Current Iteration)` lists only the findings created in the present audit cycle.
+        - `### Historical Findings Log` persists all prior findings (resolved, accepted risk, or still open) in reverse
+          chronological order so the dossier keeps institutional memory.
+    - Historical entries must retain their original `F###` identifiers, title, severity at report time, the iteration
+      timestamp (e.g., `Reported: 2025-10-03`), reviewer handle, and a `Status:` line such as `[Resolved 2025-10-05]`,
+      `[Accepted Risk 2025-10-07]`, or `[Open – pending verification]`.
+      When a prior `audit.md` exists, migrate any items previously listed under `Active Findings` into the historical log
+      before overwriting content and append a brief resolution note referencing `tasks.md` (e.g., the completed Phase
+      4.R task id or PR link) plus the evidence command that validated closure.
     - Document **Strengths** with supporting citations and list outstanding `[NEEDS CLARIFICATION: …]` items in the
       dedicated section.
     - Publish the current `CONTROL_INVENTORY` in the provided table (or link to its structured artifact if stored
@@ -218,12 +239,19 @@ semantics:
 14. **MANDATORY** Archival write-back and task generation
 
     - Reference `FEATURE_DIR` gathered in Step 2.
-    - Review output filing: present the rendered report to the operator, and create or amend `review.md` inside
-      `FEATURE_DIR` with the contents of the report.
+    - Review output filing: present the rendered report to the operator, and create or amend `audit.md` inside
+      `FEATURE_DIR` without discarding past findings history.
+        - If `audit.md` already exists, load its contents before writing the new report so the prior `### Historical
+          Findings Log` is preserved.
+        - Promote the previous iteration's `### Active Findings (Current Iteration)` entries into the historical log,
+          updating their `Status:` note using `tasks.md` Phase 4.R (checked tasks → `[Resolved {YYYY-MM-DD}]`, unchecked
+          → `[Open – pending remediation]`, accepted-risk flag → `[Accepted Risk {YYYY-MM-DD}]`).
+        - Prepend the newly generated report (with the refreshed Active Findings section) ahead of the retained history
+          and write the merged markdown back to `FEATURE_DIR/audit.md`.
     - Open `tasks.md` in `FEATURE_DIR` and overwrite or create a **Phase 4.R: Review Follow-Up** section using
       the format defined in `/templates/tasks-template.md` with a new task per finding.
         - Each finding documented in the report must be represented as a new unchecked task in Phase 4.R with the pattern
-          `- [ ] F{FINDING_ID} Finding {FINDING_ID}: {FINDING_TITLE} as described in review.md`. Reference `review.md`
+          `- [ ] F{FINDING_ID} Finding {FINDING_ID}: {FINDING_TITLE} as described in audit.md`. Reference `audit.md`
           (or the specific evidence path) in the description when additional context is needed.
 
 ---
@@ -232,7 +260,7 @@ semantics:
 
 > The following baseline requirements are **seeded into `REVIEW_REQUIREMENTS`** in Step 7. Add project-specific mandates
 > and citations as needed.
-
+ 
 ### Governance & Process
 
 - **GOV-01 Small, Focused Changes** — **SHOULD**: Prefer small, coherent CLs with clear descriptions and linked issues.
@@ -325,10 +353,10 @@ semantics:
 
 ## Review Content (unchanged structure, augmented expectations)
 
-- **Governance Inputs**: `SPEC_KIT_CONFIG`, constitution path, and any `SPEC_KIT_CONFIG.review.documents` define
+- **Governance Inputs**: `SPEC_KIT_CONFIG`, constitution path, and any `SPEC_KIT_CONFIG.audit.documents` define
   baseline guardrails and MUST be loaded before analysis. Confirm platform enforcement posture (protected branches,
   required checks, CODEOWNERS).
-- **Prerequisite Signals**: Outputs from `/scripts/bash/check-implementation-prerequisites.sh --json` (
+- **Prerequisite Signals**: Outputs from `/scripts/bash/check-prerequisites.sh --json` (
   especially `FEATURE_DIR` and `AVAILABLE_DOCS`) guide dossier discovery, command authorization, and absolute-path
   enforcement.
 - **Feature Dossier**: Files inside `FEATURE_DIR` (`plan.md`, `tasks.md`, `research.md`, plus optional `data-model.md`,
@@ -346,7 +374,7 @@ semantics:
   current state, runtime warnings, and diff analyses supply objective signals that substantiate findings.
 - **Analysis Dimensions**: Evaluate architecture alignment, cross-cutting controls, regression risks, dependency health,
   security posture, accessibility, performance, and documentation strength before concluding.
-- **Deliverable Schema**: Review outputs MUST be rendered from `/templates/review-template.md`, populating every
+- **Deliverable Schema**: Review outputs MUST be rendered from `/templates/audit-template.md`, populating every
   section (Final Status, Resolved Scope narrative, severity-ordered findings with metadata, strengths, outstanding
   `[NEEDS CLARIFICATION]` items, published `CONTROL_INVENTORY`, Quality Signal Summary, Dependency Audit Summary,
   Requirements Compliance Checklist, Decision Log, Remediation Logging).

@@ -2,5 +2,7 @@
 # See docs/configuration.md for a full example of this file.
 
 spec-kit:
+  - changelog:
+      path: "/CHANGELOG.md"
   - constitution:
       path: "/memory/constitution.md"

@@ -1118,7 +1118,8 @@ def init(
         "",
         f"○ [cyan]/clarify[/] [bright_black](optional)[/bright_black] - Ask structured questions to de-risk ambiguous areas before planning (run before [cyan]/plan[/] if used)",
         f"○ [cyan]/analyze[/] [bright_black](optional)[/bright_black] - Cross-artifact consistency & alignment report (after [cyan]/tasks[/], before [cyan]/implement[/])",
-        f"○ [cyan]/audit[/] [bright_black](optional)[/bright_black] - Run the governance-focused review playbook to enforce policy and control gates (see templates/commands/audit.md)"
+        f"○ [cyan]/audit[/] [bright_black](optional)[/bright_black] - Run the governance-focused review playbook to enforce policy and control gates (after [cyan]/implement[/])",
+        f"○ [cyan]/changelog[/] [bright_black](optional)[/bright_black] - Prepare a detailed changelog entry and detect system documentation drift (after [cyan]/implement[/] or [cyan]/audit[/])"
     ]
     enhancements_panel = Panel("\n".join(enhancement_lines), title="Enhancement Commands", border_style="cyan", padding=(1,2))
     console.print()

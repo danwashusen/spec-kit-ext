@@ -23,16 +23,21 @@ Given that feature description, do this:
 2. Run the script `{SCRIPT}` from the repo root and parse its JSON output for BRANCH_NAME and SPEC_FILE. All future file paths must be absolute.
   **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for.
 
-3. If defined, read documents from `SPEC_KIT_CONFIG.specify.documents`:
+3. If defined, read documents from `SPEC_KIT_CONFIG.specify.documents`, refer to them as the document context:
    - For each item, resolve `path` to an absolute path from the repo root
    - Read the file and consider its `context` to guide specification details
    - If a file is missing, note it and continue
+   - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
 
-4. Load `/templates/spec-template.md` to understand required sections.
+4. Read the changelog at the path specified by `SPEC_KIT_CONFIG.changelog.path` and incorporate any relevant historical context or conventions into the specification; if it is missing, note the gap and continue.
+ 
+5. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements that the specification must respect.
 
-5. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+6. Load `/templates/spec-template.md` to understand required sections.
 
-6. Report completion with branch name, spec file path, and readiness for the next phase.
+7. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+
+8. Report completion with branch name, spec file path, and readiness for the next phase.
 
 Note: The script creates and checks out the new branch and initializes the spec file before writing.
 

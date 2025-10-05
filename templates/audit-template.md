@@ -51,9 +51,11 @@ spec-kit:
 
 ## Findings
 
+### Active Findings (Current Iteration)
+
 > Order findings from highest to lowest severity. Populate every metadata field to satisfy the deliverable schema.
 
-### Finding {FINDING_1_ID}: {FINDING_1_TITLE}
+#### Finding {FINDING_1_ID}: {FINDING_1_TITLE}
 - **Category**: {FINDING_1_CATEGORY}
 - **Severity**: {FINDING_1_SEVERITY}
 - **Confidence**: {FINDING_1_CONFIDENCE}
@@ -63,7 +65,7 @@ spec-kit:
 - **Source Requirement**: {FINDING_1_SOURCE_REQUIREMENT}
 - **Files**: {FINDING_1_FILES}
 
-### Finding {FINDING_2_ID}: {FINDING_2_TITLE}
+#### Finding {FINDING_2_ID}: {FINDING_2_TITLE}
 - **Category**: {FINDING_2_CATEGORY}
 - **Severity**: {FINDING_2_SEVERITY}
 - **Confidence**: {FINDING_2_CONFIDENCE}
@@ -74,6 +76,20 @@ spec-kit:
 - **Files**: {FINDING_2_FILES}
 
 _(Add additional findings as required, maintaining severity ordering.)_
+
+### Historical Findings Log
+
+> Preserve previously reported findings even after resolution. Keep the newest historical entries at the top and
+> include their status, resolution notes, and links to confirming evidence.
+
+- [Resolved {FINDING_H1_RESOLVED_ON}] {FINDING_H1_ID}: {FINDING_H1_TITLE} — Reported {FINDING_H1_REPORTED_ON} by
+  {FINDING_H1_REVIEWER}. Resolution: {FINDING_H1_RESOLUTION_NOTE}. Evidence: {FINDING_H1_EVIDENCE_REFERENCES}.
+- [Accepted Risk {FINDING_H2_DECISION_ON}] {FINDING_H2_ID}: {FINDING_H2_TITLE} — Reported {FINDING_H2_REPORTED_ON} by
+  {FINDING_H2_REVIEWER}. Decision: {FINDING_H2_DECISION_NOTE}. Evidence: {FINDING_H2_EVIDENCE_REFERENCES}.
+- [Open] {FINDING_H3_ID}: {FINDING_H3_TITLE} — Reported {FINDING_H3_REPORTED_ON} by {FINDING_H3_REVIEWER}.
+  Follow-up: {FINDING_H3_NEXT_ACTION}. Evidence: {FINDING_H3_EVIDENCE_REFERENCES}.
+
+_(Append additional historical entries as needed.)_
 
 ## Strengths
 

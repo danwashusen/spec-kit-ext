@@ -17,10 +17,11 @@ Follow this execution flow:
    - Otherwise load `/config-default.yaml`
    - Extract the root `spec-kit` entry and store it as `SPEC_KIT_CONFIG`
 
-2. If defined, read documents from `SPEC_KIT_CONFIG.constitution.documents`:
+2. If defined, read documents from `SPEC_KIT_CONFIG.constitution.documents`, refer to them as the document context:
     - For each item, resolve `path` to an absolute path from the repo root
     - Read the file and consider its `context` to guide constitutional decisions
     - If a file is missing, note it and continue
+   - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
 
 3. If the constitution file exists, load the existing constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path`.
     **IMPORTANT**: Consider the existing constitution as a primary source of truth to resolve placeholders in the constitution template.
