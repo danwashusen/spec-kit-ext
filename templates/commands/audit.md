@@ -23,6 +23,11 @@ semantics:
 
 # Code Review Playbook
 
+## Overview
+
+This playbook guides the review of a feature implementation. Each step is a discrete, self-contained unit of work that
+must be completed before the next step can begin. **All steps are mandatory.**
+
 ## Flow
 
 1. Initialize Spec Kit configuration
