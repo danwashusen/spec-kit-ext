@@ -20,8 +20,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 1. **Setup**:
    - Load Spec Kit configuration (`/.specify.yaml` if present, otherwise `/config-default.yaml`) and extract the root `spec-kit` entry as `SPEC_KIT_CONFIG`.
-   - Run `{SCRIPT}` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. All paths must be absolute.
-   - Before proceeding, read FEATURE_SPEC and confirm a `## Clarifications` section exists with at least one `Session` subheading or the user explicitly instructed you to skip clarifications. If missing and ambiguity remains (vague requirements, unresolved critical decisions), STOP and tell the user to run `/speckit.clarify`.
+   - Run `{SCRIPT}` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Load context**:
    - Re-read FEATURE_SPEC in detail (requirements, success criteria, constraints).

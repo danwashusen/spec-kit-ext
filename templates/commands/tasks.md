@@ -17,7 +17,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 1. **Setup**:
    - Load Spec Kit configuration (`/.specify.yaml` if present, otherwise `/config-default.yaml`) and extract the root `spec-kit` entry as `SPEC_KIT_CONFIG`.
-   - Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute.
+   - Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Load design documents**: Read from FEATURE_DIR:
    - **Required**: plan.md (tech stack, libraries, structure), spec.md (user stories with priorities)

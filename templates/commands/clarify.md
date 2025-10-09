@@ -28,6 +28,7 @@ Execution steps:
      * `FEATURE_SPEC`
      * (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
    - If JSON parsing fails, abort and instruct the user to re-run `/speckit.specify` or verify the feature branch setup.
+   - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. Load supporting context, then run the ambiguity scan:
    - Read `FEATURE_SPEC` fully.
