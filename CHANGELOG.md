@@ -2,21 +2,24 @@
 
 <!-- markdownlint-disable MD024 -->
 
-All notable changes to the Specify CLI will be documented in this file.
+All notable changes to the Specify CLI and templates are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [LATEST_VERSION] - RELEASE_DATE
+## [0.0.18] - 2025-10-06
 
 ### Added
 
-- Support for using `.` as a shorthand for current directory in `specify-ext init .` command, equivalent to `--here` flag but more intuitive for users
-
-## [0.0.18] - 2025-09-25
+- Support for using `.` as a shorthand for current directory in `specify-ext init .`, equivalent to the `--here` flag but more intuitive for users.
+- Use the `/speckit.` command prefix to easily discover Spec Kit-related commands.
+- Refactor the prompts and templates to simplify their capabilities and how they are tracked—no more injecting tests when they are not needed.
+- Ensure that tasks are created per user story to simplify testing and validation.
+- Add support for Visual Studio Code prompt shortcuts and automatic script execution.
 
 ### Changed
 
+- All command files now prefix with `speckit.` (e.g., `speckit.specify.md`, `speckit.plan.md`) for better discoverability and differentiation in IDE/CLI command palettes and file explorers.
 - Renamed the published package to `specify-ext-cli` and adjusted the CLI entrypoint to `specify-ext` to avoid conflicts with the upstream `specify-cli` distribution.
 - Updated documentation examples to reference the new package and command names.
 

@@ -5,101 +5,117 @@ scripts:
   ps: scripts/powershell/check-prerequisites.ps1 -Json
 ---
 
-The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
+## User Input
 
-User input:
-
+```text
 $ARGUMENTS
+```
 
-1. Load Spec Kit configuration:
-   - Check for `/.specify.yaml` at the host project root; if it exists, load that file
-   - Otherwise load `/config-default.yaml`
-   - Extract the root `spec-kit` entry and store it as `SPEC_KIT_CONFIG`
+You **MUST** consider the user input before proceeding (if not empty).
 
-2. Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All future file paths must be absolute.
+## Outline
 
-3. If defined, read documents from `SPEC_KIT_CONFIG.tasks.documents`, refer to them as the document context:
-   - For each item, resolve `path` to an absolute path from the repo root
-   - Read the file and consider its `context` to guide task generation decisions
-   - If a file is missing, note it and continue
-   - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
+1. **Setup**:
+   - Load Spec Kit configuration (`/.specify.yaml` if present, otherwise `/config-default.yaml`) and extract the root `spec-kit` entry as `SPEC_KIT_CONFIG`.
+   - Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute.
 
-4. Read the changelog at the path specified by `SPEC_KIT_CONFIG.changelog.path` and incorporate any relevant historical context or conventions into the task generation process; if it is missing, note the gap and continue.
+2. **Load design documents**: Read from FEATURE_DIR:
+   - **Required**: plan.md (tech stack, libraries, structure), spec.md (user stories with priorities)
+   - **Optional**: data-model.md (entities), contracts/ (API endpoints), research.md (decisions), quickstart.md (test scenarios)
+   - If defined, load each `SPEC_KIT_CONFIG.tasks.documents[*]` (resolve relative to repo root) and treat the provided `context` as guidance. Read the changelog at `SPEC_KIT_CONFIG.changelog.path` (if present) and the constitution at `SPEC_KIT_CONFIG.constitution.path`. Treat all referenced files as read-only and note missing files without failing.
+   - Note: Not all projects have all documents. Generate tasks based on what's available.
 
-5. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path`.
-   - Extract every relevant principle (library-first, CLI standard, mandatory TDD, integration/observability, simplicity).
-   - Before generating or returning any tasks, run a **Constitution Compliance Check**:
-     * For each planned task, verify it respects every principle (e.g., tests precede code, no implementation without CLI/testing hooks, keep changes within library-first boundaries).
-     * If any task would force a violation, rewrite the task list or surface an **Open Question** instead of producing invalid tasks.
-     * You must not produce a `tasks.md` that conflicts with the constitution.
+3. **Execute task generation workflow** (follow the template structure):
+   - Load plan.md and extract tech stack, libraries, project structure
+   - **Load spec.md and extract user stories with their priorities (P1, P2, P3, etc.)**
+   - If data-model.md exists: Extract entities → map to user stories
+   - If contracts/ exists: Each file → map endpoints to user stories
+   - If research.md exists: Extract decisions → generate setup tasks
+   - **Generate tasks ORGANIZED BY USER STORY**:
+     - Setup tasks (shared infrastructure needed by all stories)
+     - **Foundational tasks (prerequisites that must complete before ANY user story can start)**
+     - For each user story (in priority order P1, P2, P3...):
+       - Group all tasks needed to complete JUST that story
+       - Include models, services, endpoints, UI components specific to that story
+       - Mark which tasks are [P] parallelizable
+       - If tests requested: Include tests specific to that story
+     - Polish/Integration tasks (cross-cutting concerns)
+   - **Tests are OPTIONAL**: Only generate test tasks if explicitly requested in the feature spec or user asks for TDD approach
+   - Apply task rules:
+     - Different files = mark [P] for parallel
+     - Same file = sequential (no [P])
+     - If tests requested: Tests before implementation (TDD order)
+   - Number tasks sequentially (T001, T002...)
+   - Generate dependency graph showing user story completion order
+   - Create parallel execution examples per user story
+   - Validate task completeness (each user story has all needed tasks, independently testable)
 
-6. Load and analyze available design documents:
-   - Always read plan.md for tech stack and libraries
-   - IF EXISTS: Read data-model.md for entities
-   - IF EXISTS: Read contracts/ for API endpoints
-   - IF EXISTS: Read research.md for technical decisions
-   - IF EXISTS: Read quickstart.md for test scenarios
+4. **Generate tasks.md**: Use `.specify/templates/tasks-template.md` as structure, fill with:
+   - Correct feature name from plan.md
+   - Phase 1: Setup tasks (project initialization)
+   - Phase 2: Foundational tasks (blocking prerequisites for all user stories)
+   - Phase 3+: One phase per user story (in priority order from spec.md)
+     - Each phase includes: story goal, independent test criteria, tests (if requested), implementation tasks
+     - Clear [Story] labels (US1, US2, US3...) for each task
+     - [P] markers for parallelizable tasks within each story
+     - Checkpoint markers after each story phase
+   - Final Phase: Polish & cross-cutting concerns
+   - Numbered tasks (T001, T002...) in execution order
+   - Clear file paths for each task
+   - Dependencies section showing story completion order
+   - Parallel execution examples per story
+   - Implementation strategy section (MVP first, incremental delivery)
+   - If `research.md` exists, append two new sections after existing content:
+     * `## System Context` – capture additional environmental or operational details required for implementation based on loaded documents and `{ARGS}`.
+     * `## Codebase Summary` – summarize repository insights that will help an AI coding assistant execute the tasks efficiently.
+   - Reference all files using repository-root anchored paths (e.g., `/backend/src/...`) rather than host-specific prefixes.
 
-   Note: Not all projects have all documents. For example:
-   - CLI tools might not have contracts/
-   - Simple libraries might not need data-model.md
-   - Generate tasks based on what's available
-
-7. Generate tasks following the template:
-   - Use `/templates/tasks-template.md` as the base
-   - Replace example tasks with actual tasks based on:
-     * **Setup tasks**: Project init, dependencies, linting
-     * **Test tasks [P]**: One per contract, one per integration scenario
-     * **Core tasks**: One per entity, service, CLI command, endpoint
-     * **Integration tasks**: DB connections, middleware, logging
-     * **Polish tasks [P]**: Quality gates, tests, performance, docs
-
-8. Task generation rules:
-   - Each contract file → contract test task marked [P]
-   - Each entity in data-model → model creation task marked [P]
-   - Each endpoint → implementation task (not parallel if shared files)
-   - Each user story → integration test marked [P]
-   - Different files = can be parallel [P]
-   - Same file = sequential (no [P])
-
-9. Order tasks by dependencies:
-   - Setup before everything
-   - Tests before implementation (TDD)
-   - Models before services
-   - Services before endpoints
-   - Core before integration
-   - Everything before polish
-
-10. Include parallel execution examples:
-    - Group [P] tasks that can run together
-    - Show actual Task agent commands
-
-11. Create FEATURE_DIR/tasks.md with:
-    - Correct feature name from implementation plan
-    - Numbered tasks (T001, T002, etc.)
-    - Clear file paths for each task
-    - Dependency notes
-    - Parallel execution guidance
-
-12. Prepare a System Context section for the research.md document:
-13. The available design documents (e.e. research.md, data-model.md) are 
-    meant to provide *ALL* the information and context required for an AI
-    coding to implement the tasks consistently within a potentially complex
-    codebase.
-14. The AI coding assistant is expected to rely on the available design
-    documents for ALL the information it needs to implement the tasks
-15. Think hard to determine what additional information is required from
-    the documents and context to fully and best implement the tasks and append that 
-    information to the research.md document under a "System Context" heading.
-16. Think hard to analyze the existing codebase and prepare a detailed summary
-    to help an AI coding assistant fully and best implement these tasks,
-    append the summary to the research.md document under a "Codebase Summary"
-    heading.
+5. **Report**: Output path to generated tasks.md and summary:
+   - Total task count
+   - Task count per user story
+   - Parallel opportunities identified
+   - Independent test criteria for each story
+   - Suggested MVP scope (typically just User Story 1)
 
 Context for task generation: {ARGS}
 
 The tasks.md should be immediately executable - each task must be specific enough that an LLM can complete it without additional context.
 
-Use repository-root anchored paths in generated docs (e.g., `/frontend/src/components/`). Avoid host-specific prefixes
-like `/Users/...` or `/home/...`; treat the repository root as `/` for display. Continue using full absolute paths when
-running shell/file operations.
+## Task Generation Rules
+
+**IMPORTANT**: Tests are optional. Only generate test tasks if the user explicitly requested testing or TDD approach in the feature specification.
+
+**CRITICAL**: Tasks MUST be organized by user story to enable independent implementation and testing.
+
+1. **From User Stories (spec.md)** - PRIMARY ORGANIZATION:
+   - Each user story (P1, P2, P3...) gets its own phase
+   - Map all related components to their story:
+     - Models needed for that story
+     - Services needed for that story
+     - Endpoints/UI needed for that story
+     - If tests requested: Tests specific to that story
+   - Mark story dependencies (most stories should be independent)
+
+2. **From Contracts**:
+   - Map each contract/endpoint → to the user story it serves
+   - If tests requested: Each contract → contract test task [P] before implementation in that story's phase
+
+3. **From Data Model**:
+   - Map each entity → to the user story(ies) that need it
+   - If entity serves multiple stories: Put in earliest story or Setup phase
+   - Relationships → service layer tasks in appropriate story phase
+
+4. **From Setup/Infrastructure**:
+   - Shared infrastructure → Setup phase (Phase 1)
+   - Foundational/blocking tasks → Foundational phase (Phase 2)
+     - Examples: Database schema setup, authentication framework, core libraries, base configurations
+     - These MUST complete before any user story can be implemented
+   - Story-specific setup → within that story's phase
+
+5. **Ordering**:
+   - Phase 1: Setup (project initialization)
+   - Phase 2: Foundational (blocking prerequisites - must complete before user stories)
+   - Phase 3+: User Stories in priority order (P1, P2, P3...)
+     - Within each story: Tests (if requested) → Models → Services → Endpoints → Integration
+   - Final Phase: Polish & Cross-Cutting Concerns
+   - Each user story phase should be a complete, independently testable increment

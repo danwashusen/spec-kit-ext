@@ -1,169 +1,152 @@
 # Quick Start Guide
 
-This guide will help you get started with Spec-Driven Development using Spec Kit Ext on an existing project.
+This guide will help you get started with Spec-Driven Development using Spec Kit Ext.
 
 > NEW: All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `specify-ext` CLI auto-selects based on OS unless you pass `--script sh|ps`.
 
-## The Process
+## The 4-Step Process
 
-### 1. Install Specify
+### 1. Install Specify Ext
 
-Initialize Spec Kit Ext in your project:
+Initialize your project depending on the coding agent you're using:
 
 ```bash
-uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init --here
+uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME>
 ```
 
-### 2. Configuration
+Pick script type explicitly (optional):
+```bash
+uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME> --script ps  # Force PowerShell
+uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME> --script sh  # Force POSIX shell
 
-This fork shines when you feed the CLI the same documents your team already uses. Create `.specify.yaml` at the project root to extend the context passed into each Spec Kit command. A richer example:
+#### Add contextual documents (optional but recommended)
+
+Create a `.specify.yaml` file at the root of your project to preload the documents your team already uses. Spec Kit Ext will merge this file with `config-default.yaml` to inform every `/speckit.*` command:
 
 ```yaml
 spec-kit:
-  - constitution:
-      path: 'CONSTITUTION.md'
-      documents:
-        - path: 'docs/architecture.md'
-          context: 'Documents the architecture of the project and should be considered a primary source of truth.'
-        - path: 'docs/ui-architecture.md'
-          context: 'Documents the UI architecture of the project and should be considered a primary source of truth.'
-  - specify:
-      documents:
-        - path: 'docs/prd.md'
-          context: 'Documents the product requirements and should be considered a primary source of truth.'
-        - path: 'docs/front-end-spec.md'
-          context: 'Documents the front-end specifications and should be considered a primary source of truth.'
-  - plan:
-      technical_context:
-        - '**Coding Standards**: including Linting & Formatting, TypeScript Compiler Standards, Quality Gates, Quality Controls Governance, Critical Rules [NEEDS CLARIFICATION]'
-        - '**Test Strategy and Standards**: [NEEDS CLARIFICATION]'
-      documents:
-        - path: 'docs/architecture.md'
-          context: 'Documents the architecture of the project and should be considered a primary source of truth.'
-        - path: 'docs/ui-architecture.md'
-          context: 'Documents the UI architecture of the project and should be considered a primary source of truth.'
-        - path: 'docs/front-end-spec.md'
-          context: 'Documents the front-end specifications and should be considered a primary source of truth.'
-  - tasks:
-      documents:
-        - path: 'docs/architecture.md'
-          context: 'Documents the architecture of the project and should be considered a primary source of truth.'
-        - path: 'docs/ui-architecture.md'
-          context: 'Documents the UI architecture of the project and should be considered a primary source of truth.'
-        - path: 'docs/front-end-spec.md'
-          context: 'Documents the front-end specifications and should be considered a primary source of truth.'
-  - analyze:
-      documents:
-        - path: 'docs/prd.md'
-          context: 'Documents the product requirements and should be considered a primary source of truth, any deviations should be called out.'
-        - path: 'docs/architecture.md'
-          context: 'Documents the architecture of the project and should be considered a primary source of truth, any deviations should be called out.'
-        - path: 'docs/ui-architecture.md'
-          context: 'Documents the UI architecture of the project and should be considered a primary source of truth, any deviations should be called out.'
-        - path: 'docs/front-end-spec.md'
-          context: 'Documents the front-end specifications and should be considered a primary source of truth, any deviations should be called out.'
-  - implement:
-      documents:
-        - path: 'docs/work-flow.md'
-          context: 'Documents the implementation work-flow for the project and should be considered a primary source of truth.'
-  - audit:
-      documents:
-        - path: 'docs/prd.md'
-          context: 'Documents the product requirements and should be considered a primary source of truth, any deviations should be called out.'
-        - path: 'docs/architecture.md'
-          context: 'Documents the architecture of the project and should be considered a primary source of truth, any deviations should be called out.'
-        - path: 'docs/ui-architecture.md'
-          context: 'Documents the UI architecture of the project and should be considered a primary source of truth, any deviations should be called out.'
-        - path: 'docs/front-end-spec.md'
-          context: 'Documents the front-end specifications and should be considered a primary source of truth, any deviations should be called out.'
+  constitution:
+    path: docs/CONSTITUTION.md
+  specify:
+    documents:
+      - path: docs/prd.md
+        context: Product requirements drive user stories and acceptance criteria.
+  plan:
+    documents:
+      - path: docs/architecture.md
+        context: Reference for system architecture decisions.
+  tasks:
+    documents:
+      - path: docs/runbook.md
+        context: Operational considerations that must be reflected in tasks.
+  analyze:
+    documents:
+      - path: docs/prd.md
+        context: Flag any drift from product requirements.
+      - path: docs/architecture.md
+        context: Highlight conflicts with approved architecture decisions.
 ```
 
-**Important**: This configuration assumes your (fictional) `docs/prd.md` contains Epics and Stories the agent can reference. Adjust paths and descriptions to mirror your real project. For a deeper dive into every key and field, see [docs/configuration.md](./configuration.md).
+Missing files are skipped automatically; the agent will highlight anything it expected but couldn't read. See [docs/configuration.md](./configuration.md) for the full schema.
+```
 
-Notes:
-- Lookup order: `.specify.yaml` → `config-default.yaml`
-- Missing optional files are skipped automatically; the agent will highlight anything it expected but couldn’t read.
+### 2. Create the Spec
 
-### 3. Create the Constitution
+Use the `/speckit.specify` command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
 
-Use the `/constitution` command to define the constitution for the project you want to build.
+```bash
+/speckit.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.
+```
 
-### 4. Create the Spec
+### 3. Create a Technical Implementation Plan
 
-Use the `/specify` command to define the spec for the story you want to build. This command will create a new feature branch (e.g. `001-epic-1-story-1`) and directory in the `specs` (e.g. `specs/001-epic-1-story-1`) with a `spec.md` describing the feature:
+Use the `/speckit.plan` command to provide your tech stack and architecture choices.
+
+```bash
+/speckit.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
+```
+
+### 4. Break Down and Implement
+
+Use `/speckit.tasks` to create an actionable task list, then ask your agent to implement the feature.
+
+## Detailed Example: Building Taskify
+
+Here's a complete example of building a team productivity platform:
+
+### Step 1: Define Requirements with `/speckit.specify`
 
 ```text
-/specify Epic 1, Story 1
+Develop Taskify, a team productivity platform. It should allow users to create projects, add team members,
+assign tasks, comment and move tasks between boards in Kanban style. In this initial phase for this feature,
+let's call it "Create Taskify," let's have multiple users but the users will be declared ahead of time, predefined.
+I want five users in two different categories, one product manager and four engineers. Let's create three
+different sample projects. Let's have the standard Kanban columns for the status of each task, such as "To Do,"
+"In Progress," "In Review," and "Done." There will be no login for this application as this is just the very
+first testing thing to ensure that our basic features are set up. For each task in the UI for a task card,
+you should be able to change the current status of the task between the different columns in the Kanban work board.
+You should be able to leave an unlimited number of comments for a particular card. You should be able to, from that task
+card, assign one of the valid users. When you first launch Taskify, it's going to give you a list of the five users to pick
+from. There will be no password required. When you click on a user, you go into the main view, which displays the list of
+projects. When you click on a project, you open the Kanban board for that project. You're going to see the columns.
+You'll be able to drag and drop cards back and forth between different columns. You will see any cards that are
+assigned to you, the currently logged in user, in a different color from all the other ones, so you can quickly
+see yours. You can edit any comments that you make, but you can't edit comments that other people made. You can
+delete any comments that you made, but you can't delete comments anybody else made.
 ```
 
-Verify the `spec.md` file matches your expectations (e.g. `specs/001-epic-1-story-1/spec.md`).
+### Step 2: Refine the Specification
 
-### 5. Clarify the Spec
-
-Use the `/clarify` command to clarify the spec for the story you want to build, resolving any ambiguities. 
+After the initial specification is created, clarify any missing requirements:
 
 ```text
-/clarify ./specs/001-epic-1-story-1
+For each sample project or project that you create there should be a variable number of tasks between 5 and 15
+tasks for each one randomly distributed into different states of completion. Make sure that there's at least
+one task in each stage of completion.
 ```
 
-Verify the `spec.md` file matches your expectations (e.g. `specs/001-epic-1-story-1/spec.md`).
-
-### 6. Create a Technical Implementation Plan
-
-Use the `/plan` command to create a technical plan and research documents for the feature derived from the configured documents.
+Also validate the specification checklist:
 
 ```text
-/plan ./specs/001-epic-1-story-1
+Read the review and acceptance checklist, and check off each item in the checklist if the feature spec meets the criteria. Leave it empty if it does not.
 ```
 
-Verify the `plan.md` file matches your expectations (e.g. `specs/001-epic-1-story-1/plan.md`), review the associated `research.md` document (e.g. `specs/001-epic-1-story-1/research.md`).
+### Step 3: Generate Technical Plan with `/speckit.plan`
 
-### 7. Break Down the plan into actionable tasks
-
-Use `/tasks` to create an actionable task list, then ask your agent to implement the feature.
+Be specific about your tech stack and technical requirements:
 
 ```text
-/tasks ./specs/001-epic-1-story-1
+We are going to generate this using .NET Aspire, using Postgres as the database. The frontend should use
+Blazor server with drag-and-drop task boards, real-time updates. There should be a REST API created with a projects API,
+tasks API, and a notifications API.
 ```
 
-Verify the `tasks.md` file matches your expectations (e.g. `specs/001-epic-1-story-1/tasks.md`).
+### Step 4: Validate and Implement
 
-### 8. Analyze the documents to ensure they align with the specification
-
-Use `/analyze` to validate the specification against the documents, ensuring that the plan satisfies the specification requirements.
+Have your AI agent audit the implementation plan:
 
 ```text
-/analyze ./specs/001-epic-1-story-1
+Now I want you to go and audit the implementation plan and the implementation detail files.
+Read through it with an eye on determining whether or not there is a sequence of tasks that you need
+to be doing that are obvious from reading this. Because I don't know if there's enough here.
 ```
 
-This process is iterative and can be repeated until the specification is complete.
-
-### 9. Implement the feature
-
-Use `/implement` to implement the feature, to avoid issues introduced by context overflows avoid implementing too many tasks at once.
+Finally, implement the solution:
 
 ```text
-/implement ./specs/001-epic-1-story-1, focus on Phase 3.1
+/speckit.implement specs/002-create-taskify/plan.md
 ```
 
-```text
-/implement ./specs/001-epic-1-story-1, focus on tasks T001-T003
-```
+## Key Principles
 
-Repeat until all tasks are marked as complete in the `tasks.md` file (e.g. `specs/001-epic-1-story-1/tasks.md`).
+- **Be explicit** about what you're building and why
+- **Don't focus on tech stack** during specification phase
+- **Iterate and refine** your specifications before implementation
+- **Validate** the plan before coding begins
+- **Let the AI agent handle** the implementation details
 
-### 10. Audit the feature implementation
+## Next Steps
 
-Use `/audit` to validate the feature implementation against the documents, ensuring that the implementation follows best-practise and meets the specification requirements.
-
-```text
-/implement ./specs/001-epic-1-story-1, focus on Phase 3.1
-```
-
-```text
-/implement ./specs/001-epic-1-story-1, focus on tasks T001-T003
-```
-
-If the audit fails, you can use `/implement` to fix the issues (e.g. `/implement ./specs/001-epic-1-story-1, focus on Phase 4.R`) then re-run the audit.
-
-Once the audit completes, you can merge the feature branch into the main branch.
+- Read the complete methodology for in-depth guidance
+- Check out more examples in the repository
+- Explore the source code on GitHub

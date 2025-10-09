@@ -5,90 +5,100 @@ scripts:
   ps: scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
 ---
 
-The user input can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
+## User Input
 
-User input:
-
+```text
 $ARGUMENTS
+```
 
-1. Load Spec Kit configuration:
-   - Check for `/.specify.yaml` at the host project root; if it exists, load that file
-   - Otherwise load `/config-default.yaml`
-   - Extract the root `spec-kit` entry and store it as `SPEC_KIT_CONFIG`
+You **MUST** consider the user input before proceeding (if not empty).
 
-2. Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All future file paths must be absolute.
+## Outline
 
-3. If defined, read documents from `SPEC_KIT_CONFIG.implement.documents`, refer to them as the document context:
-   - For each item, resolve `path` to an absolute path from the repo root
-   - Read the file and consider its `context` to guide implementation decisions
-   - If a file is missing, note it and continue
-   - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
+1. Load Spec Kit configuration (`/.specify.yaml` if present, otherwise `/config-default.yaml`) and extract the root `spec-kit` entry as `SPEC_KIT_CONFIG`. Run `{SCRIPT}` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute.
 
-4. Read the changelog at the path specified by `SPEC_KIT_CONFIG.changelog.path` and incorporate any relevant historical context or conventions into the implementation decisions; if it is missing, note the gap and continue.
+2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
+   - Scan all checklist files in the checklists/ directory
+   - For each checklist, count:
+     * Total items: All lines matching `- [ ]` or `- [X]` or `- [x]`
+     * Completed items: Lines matching `- [X]` or `- [x]`
+     * Incomplete items: Lines matching `- [ ]`
+   - Create a status table:
+     ```
+     | Checklist | Total | Completed | Incomplete | Status |
+     |-----------|-------|-----------|------------|--------|
+     | ux.md     | 12    | 12        | 0          | ✓ PASS |
+     | test.md   | 8     | 5         | 3          | ✗ FAIL |
+     | security.md | 6   | 6         | 0          | ✓ PASS |
+     ```
+   - Calculate overall status:
+     * **PASS**: All checklists have 0 incomplete items
+     * **FAIL**: One or more checklists have incomplete items
 
-5. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements that the implementation must respect.
+   - **If any checklist is incomplete**:
+     * Display the table with incomplete item counts
+     * **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
+     * Wait for user response before continuing
+     * If user says "no" or "wait" or "stop", halt execution
+     * If user says "yes" or "proceed" or "continue", proceed to step 3
 
-6. Load and analyze the implementation context:
+   - **If all checklists are complete**:
+     * Display the table showing all checklists passed
+     * Automatically proceed to step 3
+
+3. Load and analyze the implementation context:
    - **REQUIRED**: Read tasks.md for the complete task list and execution plan
    - **REQUIRED**: Read plan.md for tech stack, architecture, and file structure
    - **IF EXISTS**: Read data-model.md for entities and relationships
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
+   - If defined, load each `SPEC_KIT_CONFIG.implement.documents[*]` (resolve relative to repo root) and treat the `context` as authoritative guidance. Read the changelog at `SPEC_KIT_CONFIG.changelog.path` (if present) and re-read the constitution via `SPEC_KIT_CONFIG.constitution.path` to enforce all principles. Treat these documents as read-only and note missing files without failing.
 
-7. Parse tasks.md structure and extract:
+4. Parse tasks.md structure and extract:
    - **Task phases**: Setup, Tests, Core, Integration, Polish
    - **Task dependencies**: Sequential vs parallel execution rules
    - **Task details**: ID, description, file paths, parallel markers [P]
    - **Execution flow**: Order and dependency requirements
 
-8. Execute implementation following the task plan:
+5. Execute implementation following the task plan:
    - **Phase-by-phase execution**: Complete each phase before moving to the next
    - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together
-   - **Deliver full task scope**: Implement each task’s complete, spec-compliant outcome in the current run; do not defer required capabilities (e.g., real persistence) into unstated future work, no hidden follow-up work!
-   - **Sandbox restrictions**: If the security sandbox blocks a required action (e.g., dependency installation because of network limits or permission errors), stop immediately, explain the restriction to the user, and request guidance or approval instead of attempting unsanctioned workarounds.
-   - **Assumption Handling (per-task decisions)**:
-      - All output relating to Assumption Handling must be prefixed with "[ASSUMPTION]".
-      - When evaluating implementation options for an individual task:
-         - Every potential solution **MUST** confirm the requirements in spec.md remain fully achievable
-         - Do **NOT** weigh time-versus-value trade-offs; operate as an AI with effectively unlimited capacity
-      - If no clear task-level path exists:
-         1. Explain the situation to the user.
-         2. Instruct the user to "Please amend the `research.md` document then re-run the implementation playbook".
-      - Log all decisions under an "Assumption Log" section in the relevant `tasks.md` file, include enough detail to allow future developers to understand the rationale.
-   - **Plan Deviation (task scope changes)**:
-      - All output relating to Plan Deviation must be prefixed with "[PLAN DEVIATION]".
-      - Do not alter the defined tasks or their intent unless absolutely unavoidable.
-      - Deferring scope-critical deliverables for a task (like persistence layers or integrations) counts as a deviation. If you cannot execute the task as written without such a change, explain the situation to the user and HALT immediately, seek explicit guidance from the user, and record the clarification in research.md.
    - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
    - **File-based coordination**: Tasks affecting the same files must run sequentially
-   - **Code Quality Gates**: You **MUST** ensure code quality gates are satisfied quickly per task and extensively per phase
    - **Validation checkpoints**: Verify each phase completion before proceeding
+   - **Deliver full task scope**: Each task must be implemented completely as written—no deferrals of core functionality unless explicitly approved by the user.
+   - **Sandbox restrictions**: If the execution environment blocks a required action (e.g., installing dependencies, accessing network resources), pause immediately, report the restriction, and request guidance instead of attempting workarounds.
+   - **Assumption handling**:
+     * Prefix any assumption you surface with `[ASSUMPTION]` in your output.
+     * Only proceed with an assumption when the alternative is inaction; otherwise request clarification from the user.
+     * Record the rationale in an "Assumption Log" appended to `tasks.md` near the affected task.
+   - **Plan deviations**:
+     * Prefix any deviation with `[PLAN DEVIATION]`.
+     * Halt and consult the user before changing task scope or deferring required deliverables.
+     * Document user-approved deviations in `research.md` under a new "Implementation Decisions" subsection.
+   - **Code quality gates**: Run linting, formatting, type-checking, and unit tests as prescribed by the plan within each phase.
 
-9. Implementation execution rules:
+6. Implementation execution rules:
    - **Setup first**: Initialize project structure, dependencies, configuration
    - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
    - **Core development**: Implement models, services, CLI commands, endpoints
    - **Integration work**: Database connections, middleware, logging, external services
-   - **Polish and validation**: Run code quality gates (e.g. lint and type checking, etc.), tests, performance optimization, documentation
+   - **Polish and validation**: Unit tests, performance optimization, documentation
 
-10. Progress tracking and error handling:
-    - Report progress after each completed task
-    - Halt execution if any non-parallel task fails
-    - For parallel tasks [P], continue with successful tasks, report failed ones
-    - Provide clear error messages with context for debugging
-    - Suggest next steps if implementation cannot proceed
-    - **IMPORTANT** For completed tasks, make sure to mark the task off as completed ([✓]) in the tasks.md file.
+7. Progress tracking and error handling:
+   - Report progress after each completed task
+   - Halt execution if any non-parallel task fails
+   - For parallel tasks [P], continue with successful tasks, report failed ones
+   - Provide clear error messages with context for debugging
+   - Suggest next steps if implementation cannot proceed
+   - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
-11. Completion validation:
-12. Verify all required tasks are completed
-13. Check that implemented features match the original specification
-14. Validate that tests pass and coverage meets requirements
-15. Confirm the implementation follows the technical plan
-16. Report final status with a summary of completed work
+8. Completion validation:
+   - Verify all required tasks are completed
+   - Check that implemented features match the original specification
+   - Validate that tests pass and coverage meets requirements
+   - Confirm the implementation follows the technical plan
+   - Report final status with summary of completed work
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/tasks` first to regenerate the task list.
-
-Use repository-root anchored paths in generated docs (e.g., `/frontend/src/components/`). Avoid host-specific prefixes
-like `/Users/...` or `/home/...`; treat the repository root as `/` for display. Continue using full absolute paths when
-running shell/file operations.

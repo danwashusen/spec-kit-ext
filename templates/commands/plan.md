@@ -3,60 +3,94 @@ description: Execute the implementation planning workflow using the plan templat
 scripts:
   sh: scripts/bash/setup-plan.sh --json
   ps: scripts/powershell/setup-plan.ps1 -Json
+agent_scripts:
+  sh: scripts/bash/update-agent-context.sh __AGENT__
+  ps: scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
 ---
 
-The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
+## User Input
 
-User input:
-
+```text
 $ARGUMENTS
+```
 
-Given the implementation details provided as an argument, do this:
+You **MUST** consider the user input before proceeding (if not empty).
 
-1. Load Spec Kit configuration:
-   - Check for `/.specify.yaml` at the host project root; if it exists, load that file
-   - Otherwise load `/config-default.yaml`
-   - Extract the root `spec-kit` entry and store it as `SPEC_KIT_CONFIG`
+## Outline
 
-2. Run `{SCRIPT}` from the repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. All future file paths must be absolute.
-   - BEFORE proceeding, inspect FEATURE_SPEC for a `## Clarifications` section with at least one `Session` subheading. If missing or clearly ambiguous areas remain (vague adjectives, unresolved critical choices), PAUSE and instruct the user to run `/clarify` first to reduce rework. Only continue if: (a) Clarifications exist OR (b) an explicit user override is provided (e.g., "proceed without clarification"). Do not attempt to fabricate clarifications yourself.
+1. **Setup**:
+   - Load Spec Kit configuration (`/.specify.yaml` if present, otherwise `/config-default.yaml`) and extract the root `spec-kit` entry as `SPEC_KIT_CONFIG`.
+   - Run `{SCRIPT}` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. All paths must be absolute.
+   - Before proceeding, read FEATURE_SPEC and confirm a `## Clarifications` section exists with at least one `Session` subheading or the user explicitly instructed you to skip clarifications. If missing and ambiguity remains (vague requirements, unresolved critical decisions), STOP and tell the user to run `/speckit.clarify`.
 
-3. Read and analyze the feature specification to understand:
-   - The feature requirements and user stories
-   - Functional and non-functional requirements
-   - Success criteria and acceptance criteria
-   - Any technical constraints or dependencies mentioned
+2. **Load context**:
+   - Re-read FEATURE_SPEC in detail (requirements, success criteria, constraints).
+   - Read the constitution from `SPEC_KIT_CONFIG.constitution.path` and enforce every MUST principle.
+   - If defined, load each `SPEC_KIT_CONFIG.plan.documents[*]` file (resolve relative to repo root) and treat its `context` as planning guidance. Note missing files without failing.
+   - Read the changelog at `SPEC_KIT_CONFIG.changelog.path` (if present) to capture institutional knowledge.
+   - Load the IMPL_PLAN template (already copied) to prepare for execution.
+   - Treat all referenced documents as read-only unless explicitly instructed otherwise.
 
-4. If defined, read documents from `SPEC_KIT_CONFIG.plan.documents`, refer to them as the document context:
-   - For each item, resolve `path` to an absolute path from the repo root
-   - Read the file and consider its `context` to guide planning decisions
-   - If a file is missing, note it and continue
-   - Consider the file to be read-only, **do NOT modify the file unless instructed to do so**
+3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
+   - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")
+   - Incorporate additional constraints or preferences provided in `{ARGS}` into Technical Context and planning decisions
+   - Fill Constitution Check section from constitution
+   - Evaluate gates (ERROR if violations unjustified)
+   - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
+   - Phase 1: Generate data-model.md, contracts/, quickstart.md
+   - Phase 1: Update agent context by running the agent script
+   - Re-evaluate Constitution Check post-design
 
-5. Read the changelog at the path specified by `SPEC_KIT_CONFIG.changelog.path` and incorporate any relevant historical context or conventions into the planning decisions; if it is missing, note the gap and continue.
+4. **Stop and report**: Command ends after Phase 2 planning. Report branch, IMPL_PLAN path, and generated artifacts.
 
-6. Read the constitution at the path specified by `SPEC_KIT_CONFIG.constitution.path` to understand constitutional requirements that the planning **MUST** respect.
+## Phases
 
-7. Execute the implementation plan template:
-   - Load `/templates/plan-template.md` (already copied to IMPL_PLAN path)
-   - Set Input path to FEATURE_SPEC
-   - Run the Execution Flow (main) function steps 1-9
-   - The template is self-contained and executable
-   - Follow error handling and gate checks as specified
-   - Let the template guide artifact generation in $SPECS_DIR:
-     * Phase 0 generates research.md
-     * Phase 1 generates data-model.md, contracts/, quickstart.md
-     * Phase 2 generates tasks.md
-   - Incorporate user-provided details from arguments into Technical Context: {ARGS}
-   - Update Progress Tracking as you complete each phase
+### Phase 0: Outline & Research
 
-8. Verify execution completed:
-   - Check Progress Tracking shows all phases complete
-   - Ensure all required artifacts were generated
-   - Confirm no ERROR states in execution
+1. **Extract unknowns from Technical Context** above:
+   - For each NEEDS CLARIFICATION → research task
+   - For each dependency → best practices task
+   - For each integration → patterns task
 
-9. Report results with branch name, file paths, and generated artifacts.
+2. **Generate and dispatch research agents**:
+   ```
+   For each unknown in Technical Context:
+     Task: "Research {unknown} for {feature context}"
+   For each technology choice:
+     Task: "Find best practices for {tech} in {domain}"
+   ```
 
-Use repository-root anchored paths in generated docs (e.g., `/frontend/src/components/`). Avoid host-specific prefixes
-like `/Users/...` or `/home/...`; treat the repository root as `/` for display. Continue using full absolute paths when
-running shell/file operations.
+3. **Consolidate findings** in `research.md` using format:
+   - Decision: [what was chosen]
+   - Rationale: [why chosen]
+   - Alternatives considered: [what else evaluated]
+
+**Output**: research.md with all NEEDS CLARIFICATION resolved
+
+### Phase 1: Design & Contracts
+
+**Prerequisites:** `research.md` complete
+
+1. **Extract entities from feature spec** → `data-model.md`:
+   - Entity name, fields, relationships
+   - Validation rules from requirements
+   - State transitions if applicable
+
+2. **Generate API contracts** from functional requirements:
+   - For each user action → endpoint
+   - Use standard REST/GraphQL patterns
+   - Output OpenAPI/GraphQL schema to `/contracts/`
+
+3. **Agent context update**:
+   - Run `{AGENT_SCRIPT}`
+   - These scripts detect which AI agent is in use
+   - Update the appropriate agent-specific context file
+   - Add only new technology from current plan
+   - Preserve manual additions between markers
+
+**Output**: data-model.md, /contracts/*, quickstart.md, agent-specific file
+
+## Key rules
+
+- Use absolute paths and reference files relative to repository root (e.g., `/specs/...`)
+- ERROR on gate failures or unresolved clarifications

@@ -38,7 +38,12 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 ## Development workflow
 
-See `docs/local-development.md` for up-to-date, end-to-end instructions.
+See `docs/local-development.md` for up-to-date, end-to-end instructions. When working on Spec Kit:
+
+1. Test changes with the CLI commands (`/speckit.specify`, `/speckit.plan`, `/speckit.tasks`) in your coding agent of choice.
+2. Verify templates under `templates/` render as expected for each agent.
+3. Test script functionality in the `scripts/` directory.
+4. Ensure memory files (for example, `memory/constitution.md`) are updated if major process changes are made.
 
 ## AI contributions in Spec Kit
 
