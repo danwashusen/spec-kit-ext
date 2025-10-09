@@ -25,8 +25,10 @@ semantics:
 
 ## Overview
 
-This playbook guides the review of a feature implementation. Each step is a discrete, self-contained unit of work that
-must be completed before the next step can begin. **All steps are mandatory.**
+Use this playbook to run a feature review from start to finish. Work through the numbered steps in order, completing every
+subtask listed under a step before moving on. Produce the evidence or decisions each bullet calls for, and keep progressing
+autonomously unless a gate forces you to pause or raise an open question. Treat every step as a mandatory checkpoint; log
+and surface any blocking issues before continuing downstream.
 
 ## Flow
 
@@ -84,6 +86,9 @@ must be completed before the next step can begin. **All steps are mandatory.**
       as `REVIEW_SCOPE_HINTS`
     - Capture explicit guardrails, risk registers, checklist items, or out-of-scope statements and store them as
       `REVIEW_DIRECTIVES`
+    - Normalize every risk register entry, unresolved follow-up, and assumption from `tasks.md`, `research.md`, and other
+      dossier sources; add them to `REVIEW_DIRECTIVES` with status markers (`mitigated`, `open`, `unknown`) so later steps
+      must reconcile each one
     - Parse the `Requirements` section of `spec.md` to build `SPEC_REQUIREMENTS`; for each requirement capture `id`
       (e.g., `FR-###`), verbatim rule text, related acceptance scenarios/tests, and any embedded clarification markers
     - Start a `CONTROL_INVENTORY` by mapping each cross-cutting control mandated in the gathered documents (e.g., logging,
@@ -133,8 +138,10 @@ must be completed before the next step can begin. **All steps are mandatory.**
         - **Change Intent Gate**: change aligns with POR; else → `Blocked: Scope Mismatch`
         - **Unknowns Gate**: unresolved `[NEEDS CLARIFICATION: …]` → `Needs Clarification`
         - **Requirements Coverage Gate**: every `FR-###` in `SPEC_REQUIREMENTS` maps to implementation/test evidence, an
-          explicit finding, or a documented clarification request; otherwise → `Changes Requested` (missing implementation),
-          `Needs Clarification` (ambiguous requirement), or `Blocked: Scope Mismatch` (requirement intentionally deferred)
+          explicit finding, or a documented clarification request; include previously logged risks and assumptions—if still
+          unresolved, treat them as coverage gaps that must become findings or clarifications. Otherwise → `Changes Requested`
+          (missing implementation), `Needs Clarification` (ambiguous requirement), or `Blocked: Scope Mismatch`
+          (requirement intentionally deferred)
         - **TDD Evidence Gate**: tests drive behavior or equivalent rationale; absence → `TDD Violation`
         - **Environment Gate**: required tooling available; blocked tooling must be resolved before proceeding
     - If any Pass 1 gate fails, stop after logging those findings. Set the current review status to the blocking gate (or
@@ -171,6 +178,11 @@ must be completed before the next step can begin. **All steps are mandatory.**
     - Review diffs/files for compliance with each item in `REVIEW_REQUIREMENTS`
     - For each `FR-###` requirement, trace implementation changes and associated tests; cite concrete files, commands, or
       scenarios that satisfy the requirement, and open findings when evidence is absent or contradictory
+    - Revisit every entry in `REVIEW_DIRECTIVES`, `ASSUMPTION_LOG`, and `CONTROL_INVENTORY`; confirm mitigation evidence or
+      document why the directive no longer applies
+    - When mitigation is missing or unclear, open a finding or `[Open Question]` citing the original directive and source
+      document so closure cannot be skipped
+    - Record resolved directives and assumptions in the decision log so later audit loops understand their disposition
     - Map changes to architecture layers or boundaries; flag violations or missing abstractions with proposed remediations
     - Verify cross-cutting controls (validation, logging, error handling, accessibility, performance, security,
       observability) adhere to the mandates
@@ -192,6 +204,9 @@ must be completed before the next step can begin. **All steps are mandatory.**
       Decision Log that lists deferred gates (e.g., Security & Privacy Gate) so the next loop resumes there.
     - Complete the **Resolved Scope** section with branch, baseline, diff source, narrative, concrete paths, and
       implementation scope bullets grounded in the analyzed artifacts.
+    - Populate **Outstanding Risks & Follow-Ups** with the current status of every directive and assumption; any item still
+      open must appear under `### Active Findings` or `### Historical Findings Log` with a linked remediation or
+      clarification request
     - In **Findings**, order items from highest to lowest severity and provide the full metadata set for each entry:
       `category`, `severity`, `confidence`, `impact`, `evidence`, `remediation`, `source_requirement`, `files`.
     - Render Findings using two subsections in the final report template:
@@ -222,9 +237,9 @@ must be completed before the next step can begin. **All steps are mandatory.**
 
 12. Log remediation tasks
 
-    - For every finding with severity `Critical`, `Major`, or final status other than `Approved`, draft remediation tasks
-      that capture the exact file path, root cause, impact, recommended fix steps, and references to the relevant entry in
-      `CONTROL_INVENTORY` when one exists
+    - For every finding, outstanding risk, or assumption that remains open (severity `Critical`, `Major`, or status other
+      than `Approved`), draft remediation tasks that capture the exact file path, root cause, impact, recommended fix
+      steps, and references to the relevant entry in `CONTROL_INVENTORY` when one exists
     - Prefer remediations that align with existing controls or explicitly document when the inventory confirms a gap
     - Surface these remediation drafts in a dedicated **Remediation Logging** section using the template
       `Context → Control Reference → Actions → Verification`
