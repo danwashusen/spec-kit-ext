@@ -66,9 +66,11 @@ Use the `/speckit.plan` command to provide your tech stack and architecture choi
 /speckit.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
 ```
 
+> Phase 0 of `/speckit.plan` now adds a `Codebase Reconnaissance` section to `research.md`, cataloging every impacted module with Story/Decision IDs, config knobs, and verification hooks. Treat missing entries as TODO blockers. The generated `quickstart.md` reuses those IDs to spell out end-to-end validation flows so `/speckit.tasks` and `/speckit.implement` can dive straight into integration work.
+
 ### 4. Break Down and Implement
 
-Use `/speckit.tasks` to create an actionable task list, then ask your agent to implement the feature.
+Use `/speckit.tasks` to create an actionable task list, then ask your agent to implement the feature. The generated `tasks.md` now ships with an `Implementation Log` section that `/speckit.implement` rereads on startup, so keep the newest entries at the top and capture enough context for any future session to resume without guessing.
 
 ## Detailed Example: Building Taskify
 
@@ -131,7 +133,7 @@ Read through it with an eye on determining whether or not there is a sequence of
 to be doing that are obvious from reading this. Because I don't know if there's enough here.
 ```
 
-Finally, implement the solution:
+Finally, implement the solution. Each time `/speckit.implement` checks off a task it appends a new `Implementation Log` entry (timestamp, task ID, files touched, validations, and follow-ups). The playbook replays this log at the start of every run, so let it drive session hand-offs instead of ad hoc notes:
 
 ```text
 /speckit.implement specs/002-create-taskify/plan.md

@@ -65,9 +65,6 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Dependencies section showing story completion order
    - Parallel execution examples per story
    - Implementation strategy section (MVP first, incremental delivery)
-   - If `research.md` exists, append two new sections after existing content:
-     * `## System Context` – capture additional environmental or operational details required for implementation based on loaded documents and `{ARGS}`.
-     * `## Codebase Summary` – summarize repository insights that will help an AI coding assistant execute the tasks efficiently.
    - Reference all files using repository-root anchored paths (e.g., `/backend/src/...`) rather than host-specific prefixes.
 
 5. **Report**: Output path to generated tasks.md and summary:

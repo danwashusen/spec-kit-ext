@@ -113,7 +113,7 @@ Every slash command loads configuration (preferring `.specify.yaml`, falling bac
   - Applies multi-pass review gates (scope reconciliation, quality controls, security/privacy, supply chain), running required quality commands where mandated.
   - Produces a detailed review report following `/templates/review-template.md`, archives it to `specs/<feature>/review.md`, and injects follow-up tasks into `tasks.md` under **Phase 4.R: Review Follow-Up**.
 - **Outputs**: Governance-aligned `review.md`, augmented `tasks.md` with remediation tasks, and an audit trail of findings and strengths ready for release decisions.
-
+- **Notes**: It's possible to guide the audit process by first describing any issues, then initiating the audit process.
 ## Contributing
 
 Please see our [Contributing Guide](https://github.com/github/spec-kit/blob/main/CONTRIBUTING.md) for information on how to contribute to this project.

@@ -237,6 +237,14 @@ With multiple developers:
 
 ---
 
+## Implementation Log
+
+*Maintained by `/speckit.implement`; newest entries go at the top. Capture enough detail for a future session to resume without rereading other files.*
+
+- 2024-04-05T18:42:33Z — **Task T012** Implemented customer repository integration; Files: `src/services/customer.py`, `tests/integration/test_customer.py`; Validations: `pytest tests/integration/test_customer.py`; Follow-ups: "Review retry policy against upstream API limits."
+
+---
+
 ## Notes
 
 - [P] tasks = different files, no dependencies

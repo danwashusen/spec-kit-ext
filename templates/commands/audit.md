@@ -112,8 +112,6 @@ and surface any blocking issues before continuing downstream.
 7. Harvest governing requirements
 
     - **Seed `REVIEW_REQUIREMENTS`** with:
-        - Template gates from `/templates/plan-template.md`, `/templates/tasks-template.md`,
-          and `.claude/commands/implement.md` (unchanged from v1)
         - **Global Normative Requirements (baseline)** from this playbook (see **Requirements Catalog**)
         - Additional controlling documents from `SPEC_KIT_CONFIG`, `AVAILABLE_DOCS`, and operator-provided standards digests
         - Feature-level directives from `SPEC_REQUIREMENTS`, preserving their IDs and original wording
@@ -131,34 +129,33 @@ and surface any blocking issues before continuing downstream.
 
 8. Run pre-review gates
 
-    - **Gate tiering**: Reviews run in iterative loops. Evaluate gates in focused passes so the first audit isolates
-      foundational blockers and later passes layer on nuanced checks.
-    - **Pass 1 – Foundational (first audit loop)**:
+    - **Gate tiering**: Reviews run in iterative loops. Evaluate the gates below in sequence so foundational blockers land
+      before higher-order controls.
+    - **Review Gates (run in order)**:
         - **Context Gate**: required dossier files exist; else → `Blocked: Missing Context`
         - **Change Intent Gate**: change aligns with POR; else → `Blocked: Scope Mismatch`
         - **Unknowns Gate**: unresolved `[NEEDS CLARIFICATION: …]` → `Needs Clarification`
+        - **TDD Evidence Gate**: tests drive behavior or equivalent rationale; absence → `TDD Violation`
+        - **Environment Gate**: required tooling available; blocked tooling must be resolved before proceeding
+        - **Separation of Duties Gate**: author cannot self-approve; emergency bypasses are exceptional and auditable
+        - **Code Owners Gate**: changes under owned paths require owner approval (if CODEOWNERS configured)
+        - **Quality Controls Gate**: linting/typing/formatting/CI guardrails untouched unless explicitly in scope; unexpected changes or failing/missing evidence → `Quality Controls Violation`
         - **Requirements Coverage Gate**: every `FR-###` in `SPEC_REQUIREMENTS` maps to implementation/test evidence, an
           explicit finding, or a documented clarification request; include previously logged risks and assumptions—if still
           unresolved, treat them as coverage gaps that must become findings or clarifications. Otherwise → `Changes Requested`
           (missing implementation), `Needs Clarification` (ambiguous requirement), or `Blocked: Scope Mismatch`
           (requirement intentionally deferred)
-        - **TDD Evidence Gate**: tests drive behavior or equivalent rationale; absence → `TDD Violation`
-        - **Environment Gate**: required tooling available; blocked tooling must be resolved before proceeding
-    - If any Pass 1 gate fails, stop after logging those findings. Set the current review status to the blocking gate (or
-      `Review Pending` when multiple gates are open) and record in the decision log that Pass 2 gates remain outstanding;
-      instruct the operator to rerun the audit after remediation instead of proceeding to nuanced checks.
-    - **Pass 2 – Risk & controls (subsequent loops)**:
-        - **Separation of Duties Gate**: author cannot self-approve; emergency bypasses are exceptional and auditable
-        - **Code Owners Gate**: changes under owned paths require owner approval (if CODEOWNERS configured)
-        - **Quality Controls Gate**: linting/typing/formatting/CI guardrails untouched unless explicitly in scope;
-          unexpected changes → `Quality Controls Violation`
         - **Security & Privacy Gate**: security/privacy checklist attached and applicable items addressed; else →
           `Security Gate Failure` or `Privacy Gate Failure`
         - **Supply Chain Gate**: dependency/SBOM/provenance checks enabled per policy (SLSA/CIS posture); else →
           `Supply Chain Violation`
-    - When Pass 2 gates surface issues, capture targeted findings and, if they block approval, pause before entering
-      additional specialized reviews (e.g., accessibility, observability) to keep context focused for the next
-      fix→audit loop.
+    - If any gate fails, log those findings and set the current review status to the blocking gate (or `Review Pending`
+      when multiple gates are open). Record in the decision log which remaining gates still require evaluation, then
+      continue directly to Step 14 (Archival write-back and task generation) before pausing further analysis and
+      instructing the operator to rerun the audit after remediation.
+    - When later gates surface issues, capture targeted findings and, if they block approval, pause before entering
+      additional specialized reviews (e.g., accessibility, observability) to keep context focused for the next fix→audit
+      loop.
 
 9. Collect objective evidence
 
@@ -173,7 +170,7 @@ and surface any blocking issues before continuing downstream.
 
 10. Analyze implementation changes
 
-    - Defer deeper analysis until Pass 1 gates pass; when foundational blockers exist, summarize their impact and log
+    - Defer deeper analysis until the gating sequence clears; when foundational blockers exist, summarize their impact and log
       deferred review dimensions for the next audit iteration instead of generating exhaustive findings.
     - Review diffs/files for compliance with each item in `REVIEW_REQUIREMENTS`
     - For each `FR-###` requirement, trace implementation changes and associated tests; cite concrete files, commands, or
@@ -193,13 +190,18 @@ and surface any blocking issues before continuing downstream.
 
 11. Assemble review deliverables
 
+    - If `{FEATURE_DIR}/audit.md` already exists, load it before drafting the new report and cache the current
+      `### Active Findings (Current Iteration)` entries plus the full `### Historical Findings Log`. Preserve this data so
+      the refreshed report can merge seamlessly with prior iterations.
+    - On first-run dossiers (no existing `audit.md`), initialize an empty historical log per `/templates/audit-template.md`.
     - Populate `/templates/audit-template.md` exactly as structured; the template is the canonical output
-      format.
+      format, but inject the cached historical entries alongside the new iteration so the working draft already contains
+      the combined `Historical Findings` content before write-back.
     - Record the **Final Status** using the defined taxonomy:
       `Approved`, `Changes Requested`, `Blocked: Missing Context`, `Blocked: Scope Mismatch`, `Needs Clarification`,
       `TDD Violation`, `Quality Controls Violation`, `Security Gate Failure`, `Privacy Gate Failure`,
       `Supply Chain Violation`, `Dependency Vulnerabilities`, `Deprecated Dependencies`, `Review Pending`.
-    - When the audit halts after Pass 1 gates, mark the report as partial: set Final Status to the highest-severity
+    - When the audit halts during gate evaluation, mark the report as partial: set Final Status to the highest-severity
       blocking gate (or `Review Pending` when awaiting fixes) and add a `Partial coverage` note in Findings and the
       Decision Log that lists deferred gates (e.g., Security & Privacy Gate) so the next loop resumes there.
     - Complete the **Resolved Scope** section with branch, baseline, diff source, narrative, concrete paths, and
@@ -259,20 +261,33 @@ and surface any blocking issues before continuing downstream.
 14. **MANDATORY** Archival write-back and task generation
 
     - Reference `FEATURE_DIR` gathered in Step 2.
-    - Review output filing: present the rendered report to the operator, and create or amend `audit.md` inside
+    - Review output filing: present the rendered, merged report to the operator, then create or amend `audit.md` inside
       `FEATURE_DIR` without discarding past findings history.
-        - If `audit.md` already exists, load its contents before writing the new report so the prior `### Historical
-          Findings Log` is preserved.
-        - Promote the previous iteration's `### Active Findings (Current Iteration)` entries into the historical log,
+        - If a prior report was loaded, confirm the assembled markdown still contains `### Historical Findings Log`
+          before write-back; treat a missing section as a blocking issue that must be resolved prior to saving.
+        - Promote the cached `### Active Findings (Current Iteration)` entries from the prior run into the historical log,
           updating their `Status:` note using `tasks.md` Phase 4.R (checked tasks → `[Resolved {YYYY-MM-DD}]`, unchecked
           → `[Open – pending remediation]`, accepted-risk flag → `[Accepted Risk {YYYY-MM-DD}]`).
-        - Prepend the newly generated report (with the refreshed Active Findings section) ahead of the retained history
-          and write the merged markdown back to `FEATURE_DIR/audit.md`.
+        - Prepend the new iteration (with its refreshed `### Active Findings` section) ahead of the retained history and
+          write the merged markdown back to `FEATURE_DIR/audit.md`.
     - Open `tasks.md` in `FEATURE_DIR` and overwrite or create a **Phase 4.R: Review Follow-Up** section using
-      the format defined in `/templates/tasks-template.md` with a new task per finding.
-        - Each finding documented in the report must be represented as a new unchecked task in Phase 4.R with the pattern
-          `- [ ] F{FINDING_ID} Finding {FINDING_ID}: {FINDING_TITLE} as described in audit.md`. Reference `audit.md`
-          (or the specific evidence path) in the description when additional context is needed.
+      the format defined in `/templates/tasks-template.md` with a new task per finding surfaced in the current iteration.
+        - Each finding under `### Active Findings (Current Iteration)` must map to a new unchecked Phase 4.R task using
+          the pattern `- [ ] F{FINDING_ID} Finding {FINDING_ID}: {FINDING_TITLE} as described in audit.md`, and must
+          reference `audit.md` (or explicit evidence paths) for context.
+        - When findings migrate into the historical log on later runs, update or check off the corresponding Phase 4.R
+          tasks before creating new tasks for the latest findings to keep report, task list, and history synchronized.
+
+    - Helper workflow for merging reports:
+
+      ```text
+      prior_report = read_if_exists(FEATURE_DIR/audit.md)
+      prior_active, prior_history = extract_sections(prior_report)
+      new_report = render_template(current_iteration, prior_history + normalize(prior_active))
+      assert "### Historical Findings Log" in new_report when prior_report exists
+      write(FEATURE_DIR/audit.md, new_report)
+      sync_phase_4r_tasks(current_iteration.findings)
+      ```
 
 ---
 

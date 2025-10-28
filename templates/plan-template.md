@@ -94,6 +94,19 @@ ios/ or android/
 **Structure Decision**: [Document the selected structure and reference the real
 directories captured above]
 
+## Codebase Reconnaissance
+
+<!--
+  ACTION REQUIRED: Summarize exhaustive findings from Phase 0 reconnaissance.
+  Use Story IDs from spec.md (US1, US2, ...) and Decision IDs (D001, D002, ...)
+  to keep entries aligned with research.md. Add subsections per story when
+  helpful (e.g., ### US1 – Story name).
+-->
+
+| Story/Decision | File/Directory | Role Today | Helpers/Configs | Risks & Follow-up | Verification Hooks |
+|----------------|----------------|------------|-----------------|-------------------|--------------------|
+| D001 / US1     | /path/to/file  | [current behavior/responsibility] | [related utils, feature flags, env vars] | [edge cases, TODO owners] | [tests, commands, scripts] |
+
 ## Complexity Tracking
 
 *Fill ONLY if Constitution Check has violations that must be justified*

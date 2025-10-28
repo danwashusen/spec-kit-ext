@@ -190,5 +190,4 @@ _(Add additional remediation tasks as needed.)_
 ---
 
 **Review Completed**: {REVIEW_TIMESTAMP}
-**Reviewer**: Claude Code Review v2.0
 **Next Action**: {NEXT_ACTION}

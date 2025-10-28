@@ -32,8 +32,8 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Incorporate additional constraints or preferences provided in `{ARGS}` into Technical Context and planning decisions
    - Fill Constitution Check section from constitution
    - Evaluate gates (ERROR if violations unjustified)
-   - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
-   - Phase 1: Generate data-model.md, contracts/, quickstart.md
+   - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION) and catalog codebase reconnaissance findings
+   - Phase 1: Generate data-model.md, contracts/, quickstart.md linked to reconnaissance insights
    - Phase 1: Update agent context by running the agent script
    - Re-evaluate Constitution Check post-design
 
@@ -61,7 +61,13 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Rationale: [why chosen]
    - Alternatives considered: [what else evaluated]
 
-**Output**: research.md with all NEEDS CLARIFICATION resolved
+4. **Perform codebase reconnaissance**:
+   - Run a repository-wide inventory (e.g., `rg --files`, targeted `ls`, dependency manifest inspection) to surface all modules, helpers, configuration knobs, scripts, migrations, fixtures, and tests that influence the feature scope.
+   - For each finding record: Story/Decision ID (US*/D*), absolute path from repo root, current responsibility, dependent helpers/config toggles, invariants or edge cases to respect, and recommended verification hooks.
+   - Add a `## Codebase Reconnaissance` section to `research.md` with subsections per user story (e.g., `### US1 – <summary>`) and tables keyed by Decision IDs so `/speckit.implement` can jump directly to affected files.
+   - Flag any missing intelligence with `TODO` rows and note follow-up owners or blockers that must be resolved before implementation begins.
+
+**Output**: research.md with all NEEDS CLARIFICATION resolved plus Codebase Reconnaissance inventory
 
 ### Phase 1: Design & Contracts
 
@@ -84,7 +90,11 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Add only new technology from current plan
    - Preserve manual additions between markers
 
-**Output**: data-model.md, /contracts/*, quickstart.md, agent-specific file
+4. **Author quickstart scenarios tied to reconnaissance**:
+   - For each user story/decision, craft validation walkthroughs that cite the corresponding reconnaissance rows and list exact commands, data fixtures, configuration toggles, and rollback steps.
+   - Highlight environment prerequisites (secrets, services, build targets) so implementers can exercise the touched modules without additional discovery.
+
+**Output**: data-model.md, /contracts/*, quickstart.md (annotated with Story/Decision IDs), agent-specific file
 
 ## Key rules
 
