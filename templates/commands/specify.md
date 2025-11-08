@@ -25,8 +25,11 @@ Given that feature description, do this:
    - Resolve each `SPEC_KIT_CONFIG.specify.documents[*].path` relative to the repo root, read the file contents, and treat the described `context` as authoritative guidance. Note missing files without failing the command.
    - Read the changelog from `SPEC_KIT_CONFIG.changelog.path` (if present) to capture historical context that should influence the specification.
    - Read the constitution from `SPEC_KIT_CONFIG.constitution.path` and ensure every requirement respects those principles. Files are read-only unless explicitly told otherwise.
-2. Run the script `{SCRIPT}` from repo root and parse its JSON output for BRANCH_NAME and SPEC_FILE. All file paths must be absolute.
-  **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+2. Run the script `{SCRIPT}` from repo root and parse its JSON output for `BRANCH_NAME` and `SPEC_FILE`. All file paths must be absolute. The script now:
+   - Generates a concise short name (2–4 meaningful words) from the feature description while preserving technical acronyms.
+   - Fetches remote refs, scans local branches, and inspects existing `specs/<number>-<short-name>` directories to avoid branch-number collisions.
+   - Automatically selects the next available feature number unless you explicitly pass overrides.
+  **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output—always refer to it to get the actual content you're looking for. For single quotes in args like "I'm Groot", use escape syntax: e.g. `'I'\''m Groot'` (or double-quote if possible: `"I'm Groot"`).
 3. Load `templates/spec-template.md` to understand required sections.
 
 4. Follow this execution flow:

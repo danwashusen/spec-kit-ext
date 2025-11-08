@@ -26,9 +26,10 @@ semantics:
 ## Overview
 
 Use this playbook to run a feature review from start to finish. Work through the numbered steps in order, completing every
-subtask listed under a step before moving on. Produce the evidence or decisions each bullet calls for, and keep progressing
-autonomously unless a gate forces you to pause or raise an open question. Treat every step as a mandatory checkpoint; log
-and surface any blocking issues before continuing downstream.
+subtask listed under a step before moving on. After capturing the required evidence or decisions, immediately advance to
+the next instruction without waiting for an operator prompt, unless a gate explicitly requires consent or raises an open
+question. Surface blockers as soon as they appear, but otherwise keep progressing autonomously. Treat every step as a
+mandatory checkpoint; log and surface any blocking issues before continuing downstream.
 
 ## Flow
 
@@ -45,6 +46,9 @@ and surface any blocking issues before continuing downstream.
     - Run `/scripts/bash/check-prerequisites.sh --json` from the repo root
     - Parse `FEATURE_DIR` and the `AVAILABLE_DOCS` list; all future file paths must be absolute
     - Record sandbox mode, network access, and approval policy before running commands
+    - Scrape the active operator conversation for explicit feedback, clarifications, or directives;
+      normalize the results into `SESSION_FEEDBACK` entries (author, timestamp, raw text, priority
+      hints)
 
 3. Load and analyze the implementation context
 
@@ -72,7 +76,8 @@ and surface any blocking issues before continuing downstream.
 
     - Treat `FEATURE_DIR` (e.g., `specs/006-story-2-2/`) as the authoritative dossier; read `plan.md`, `tasks.md`,
       `research.md`, and related outputs to gather every directive that states scope, explicit targets, exclusions, focus
-      questions, risks, or acceptance gates
+      questions, risks, or acceptance gates; merge structured `SESSION_FEEDBACK` conversation items into
+      `REVIEW_DIRECTIVES` tagged `source: conversation` so they are audited alongside dossier instructions
     - Assume implementation occurs on a branch named after the feature directory slug (e.g., branch `006-story-2-2`);
       gather candidate diff scopes and present them to the operator as a multi-choice prompt. Default to the full feature
       branch (`HEAD`) against `main`, but also surface:
@@ -85,10 +90,10 @@ and surface any blocking issues before continuing downstream.
       descriptions, `[P]` tags, dependency notes) and `plan.md` (project structure decisions); store the consolidated list
       as `REVIEW_SCOPE_HINTS`
     - Capture explicit guardrails, risk registers, checklist items, or out-of-scope statements and store them as
-      `REVIEW_DIRECTIVES`
-    - Normalize every risk register entry, unresolved follow-up, and assumption from `tasks.md`, `research.md`, and other
-      dossier sources; add them to `REVIEW_DIRECTIVES` with status markers (`mitigated`, `open`, `unknown`) so later steps
-      must reconcile each one
+      `REVIEW_DIRECTIVES`, ensuring every `SESSION_FEEDBACK` item is represented with its current disposition
+    - Normalize every risk register entry, unresolved follow-up, conversation-sourced directive, and assumption from
+      `tasks.md`, `research.md`, and other dossier sources; add them to `REVIEW_DIRECTIVES` with status markers
+      (`mitigated`, `open`, `unknown`) so later steps must reconcile each one
     - Parse the `Requirements` section of `spec.md` to build `SPEC_REQUIREMENTS`; for each requirement capture `id`
       (e.g., `FR-###`), verbatim rule text, related acceptance scenarios/tests, and any embedded clarification markers
     - Start a `CONTROL_INVENTORY` by mapping each cross-cutting control mandated in the gathered documents (e.g., logging,
@@ -145,6 +150,9 @@ and surface any blocking issues before continuing downstream.
           unresolved, treat them as coverage gaps that must become findings or clarifications. Otherwise → `Changes Requested`
           (missing implementation), `Needs Clarification` (ambiguous requirement), or `Blocked: Scope Mismatch`
           (requirement intentionally deferred)
+        - **Feedback Alignment Gate**: each `SESSION_FEEDBACK` entry maps to confirming evidence, a linked finding, or a
+          documented clarification; unresolved items block approval (`Needs Clarification` or `Review Pending`) until coverage
+          exists
         - **Security & Privacy Gate**: security/privacy checklist attached and applicable items addressed; else →
           `Security Gate Failure` or `Privacy Gate Failure`
         - **Supply Chain Gate**: dependency/SBOM/provenance checks enabled per policy (SLSA/CIS posture); else →
@@ -175,8 +183,8 @@ and surface any blocking issues before continuing downstream.
     - Review diffs/files for compliance with each item in `REVIEW_REQUIREMENTS`
     - For each `FR-###` requirement, trace implementation changes and associated tests; cite concrete files, commands, or
       scenarios that satisfy the requirement, and open findings when evidence is absent or contradictory
-    - Revisit every entry in `REVIEW_DIRECTIVES`, `ASSUMPTION_LOG`, and `CONTROL_INVENTORY`; confirm mitigation evidence or
-      document why the directive no longer applies
+    - Revisit every entry in `REVIEW_DIRECTIVES` (including conversation-sourced `SESSION_FEEDBACK`), `ASSUMPTION_LOG`, and
+      `CONTROL_INVENTORY`; confirm mitigation evidence or document why the directive no longer applies
     - When mitigation is missing or unclear, open a finding or `[Open Question]` citing the original directive and source
       document so closure cannot be skipped
     - Record resolved directives and assumptions in the decision log so later audit loops understand their disposition
@@ -206,9 +214,9 @@ and surface any blocking issues before continuing downstream.
       Decision Log that lists deferred gates (e.g., Security & Privacy Gate) so the next loop resumes there.
     - Complete the **Resolved Scope** section with branch, baseline, diff source, narrative, concrete paths, and
       implementation scope bullets grounded in the analyzed artifacts.
-    - Populate **Outstanding Risks & Follow-Ups** with the current status of every directive and assumption; any item still
-      open must appear under `### Active Findings` or `### Historical Findings Log` with a linked remediation or
-      clarification request
+    - Populate **Outstanding Risks & Follow-Ups** with the current status of every directive and assumption, explicitly
+      enumerating each `SESSION_FEEDBACK` item; any open feedback must appear under `### Active Findings` or
+      `### Historical Findings Log` with a linked remediation or clarification request
     - In **Findings**, order items from highest to lowest severity and provide the full metadata set for each entry:
       `category`, `severity`, `confidence`, `impact`, `evidence`, `remediation`, `source_requirement`, `files`.
     - Render Findings using two subsections in the final report template:
@@ -223,6 +231,9 @@ and surface any blocking issues before continuing downstream.
       4.R task id or PR link) plus the evidence command that validated closure.
     - Document **Strengths** with supporting citations and list outstanding `[NEEDS CLARIFICATION: …]` items in the
       dedicated section.
+    - Add a `### Feedback Traceability` subsection summarizing each `SESSION_FEEDBACK` entry, the evidence gathered, and any
+      linked findings or remediation tasks so conversation directives stay auditable (keep schema synced with
+      `/templates/audit-template.md`)
     - Publish the current `CONTROL_INVENTORY` in the provided table (or link to its structured artifact if stored
       elsewhere).
     - Summarize lint, typecheck, test, and build evidence under **Quality Signal Summary**, capturing status and key
@@ -394,6 +405,9 @@ and surface any blocking issues before continuing downstream.
 - **Prerequisite Signals**: Outputs from `/scripts/bash/check-prerequisites.sh --json` (
   especially `FEATURE_DIR` and `AVAILABLE_DOCS`) guide dossier discovery, command authorization, and absolute-path
   enforcement.
+- **Conversation Feedback**: `SESSION_FEEDBACK` captures operator-provided feedback, clarifications, and priorities from
+  the current chat; treat these entries as authoritative directives that must map to evidence, findings, or
+  clarification requests in the deliverable.
 - **Feature Dossier**: Files inside `FEATURE_DIR` (`plan.md`, `tasks.md`, `research.md`, plus optional `data-model.md`,
   `contracts/`, `quickstart.md`) capture scope, risks, exclusions, and priorities; use as the authoritative source for
   `REVIEW_SCOPE_HINTS` and `REVIEW_DIRECTIVES`.

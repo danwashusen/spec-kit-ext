@@ -73,6 +73,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Parallel opportunities identified
    - Independent test criteria for each story
    - Suggested MVP scope (typically just User Story 1)
+   - Format validation: Confirm every task follows the checklist format (checkbox, ID, story label where required, file path)
 
 Context for task generation: {ARGS}
 
@@ -80,9 +81,41 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 ## Task Generation Rules
 
-**IMPORTANT**: Tests are optional. Only generate test tasks if the user explicitly requested testing or TDD approach in the feature specification.
-
 **CRITICAL**: Tasks MUST be organized by user story to enable independent implementation and testing.
+
+**Tests are OPTIONAL**: Only generate test tasks if the user explicitly requested testing or a TDD approach in the feature specification.
+
+### Checklist Format (REQUIRED)
+
+Every task MUST strictly follow this format:
+
+```text
+- [ ] T001 [P] [US1] Describe the work and include the exact file path
+```
+
+**Format Components**:
+
+1. **Checkbox**: ALWAYS start with `- [ ]` (markdown checkbox)
+2. **Task ID**: Sequential number (`T001`, `T002`, `T003`…) in execution order
+3. **[P] marker**: Include ONLY if the task is parallelizable (different files, no dependencies on incomplete tasks)
+4. **[Story] label**: REQUIRED for user story phases only
+   - Format: `[US1]`, `[US2]`, `[US3]`, etc. (maps to user stories from `spec.md`)
+   - Setup phase: no story label
+   - Foundational phase: no story label
+   - User Story phases: MUST have story label
+   - Polish phase: no story label
+5. **Description**: Clear action with the exact file path
+
+**Examples**:
+
+- ✅ `- [ ] T001 Create project structure per implementation plan`
+- ✅ `- [ ] T005 [P] Implement authentication middleware in src/middleware/auth.py`
+- ✅ `- [ ] T012 [P] [US1] Create User model in src/models/user.py`
+- ✅ `- [ ] T014 [US1] Implement UserService in src/services/user_service.py`
+- ❌ `- [ ] Create User model` (missing ID and story label)
+- ❌ `T001 [US1] Create model` (missing checkbox)
+- ❌ `- [ ] [US1] Create User model` (missing Task ID)
+- ❌ `- [ ] T001 [US1] Create model` (missing file path)
 
 1. **From User Stories (spec.md)** - PRIMARY ORGANIZATION:
    - Each user story (P1, P2, P3...) gets its own phase

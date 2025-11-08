@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./media/logo_small.webp"/>
+    <img src="./media/logo_small.webp" alt="Spec Kit Ext logo"/>
     <h1>🌱 Spec Kit Ext</h1>
     <h3><em>Extends GitHub's Spec Kit to thrive in complex and brownfield environments.</em></h3>
 </div>
@@ -68,10 +68,10 @@ specify-ext init <PROJECT_NAME>
 specify-ext check
 ```
 
-To upgrade specify run:
+To upgrade specify-ext run:
 
 ```bash
-uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git
+uv tool install specify-ext-cli --force --from git+https://github.com/danwashusen/spec-kit-ext.git
 ```
 
 #### Option 2: One-time Usage
@@ -150,7 +150,7 @@ Want to see Spec Kit in action? Watch our [video overview](https://www.youtube.c
 | [Windsurf](https://windsurf.com/)                         | ✅ |                                                   |
 | [Kilo Code](https://github.com/Kilo-Org/kilocode)         | ✅ |                                                   |
 | [Auggie CLI](https://docs.augmentcode.com/cli/overview)   | ✅ |                                                   |
-| [CodeBuddy](https://www.codebuddy.ai/)                    | ✅ |                                                   |
+| [CodeBuddy CLI](https://www.codebuddy.ai/cli)             | ✅ |                                                   |
 | [Roo Code](https://roocode.com/)                          | ✅ |                                                   |
 | [Codex CLI](https://github.com/openai/codex)              | ✅ | Set `CODEX_HOME` environment variable before using slash commands |
 | [Amazon Q Developer CLI](https://aws.amazon.com/developer/learning/q-developer-cli/) | ⚠️ | Amazon Q Developer CLI [does not support](https://github.com/aws/amazon-q-developer-cli/issues/3064) custom arguments for slash commands. |

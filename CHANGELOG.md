@@ -14,12 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Governance-focused `/speckit.audit` and release-ready `/speckit.changelog` templates with supporting audit/changelog artifacts to extend the Spec Kit workflow past implementation.
 - Default configuration snapshot (`config-default.yaml`) and richer command documentation so agents can load constitution, audit, and changelog context without manual setup.
 - Expanded documentation set covering configuration, command usage, and quickstart guidance for every slash command in the toolkit.
+- Intelligent branch naming in the `create-new-feature` scripts with `--short-name` support, semantic name generation, and GitHub-safe truncation to prevent duplicate branch numbers across local and remote repos.
 
 ### Changed
 
 - Renamed the published package and entry point to `specify-ext-cli` / `specify-ext` to avoid clashing with the upstream distribution and updated install instructions accordingly.
 - `/speckit.plan` workflow now pulls from `SPEC_KIT_CONFIG`, constitution, and changelog documents to ground design decisions in project governance.
 - CLI post-init messaging highlights the broader slash command suite to encourage end-to-end Spec-Driven Development adoption.
+- Updated `create-new-feature` help text and validation to explain new naming options while enforcing GitHub’s branch length constraints.
 
 ## [0.0.19] - 2025-10-10
 
@@ -56,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - New `/clarify` command template to surface up to 5 targeted clarification questions for an existing spec and persist answers into a Clarifications section in the spec.
 - New `/analyze` command template providing a non-destructive cross-artifact discrepancy and alignment report (spec, clarifications, plan, tasks, constitution) inserted after `/tasks` and before `/implement`.
-	- Note: Constitution rules are explicitly treated as non-negotiable; any conflict is a CRITICAL finding requiring artifact remediation, not weakening of principles.
+  - Note: Constitution rules are explicitly treated as non-negotiable; any conflict is a CRITICAL finding requiring artifact remediation, not weakening of principles.
 
 ## [0.0.16] - 2025-09-22
 
@@ -132,7 +134,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated command instructions in the CLI.
 - Cleaned up the code to not render agent-specific information when it's generic.
-
 
 ## [0.0.6] - 2025-09-17
 

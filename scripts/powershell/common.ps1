@@ -89,7 +89,39 @@ function Test-FeatureBranch {
 
 function Get-FeatureDir {
     param([string]$RepoRoot, [string]$Branch)
-    Join-Path $RepoRoot "specs/$Branch"
+
+    $specsDir = Join-Path $RepoRoot "specs"
+    $branchPath = Join-Path $specsDir $Branch
+
+    if (-not (Test-Path $specsDir -PathType Container)) {
+        return $branchPath
+    }
+
+    if ($Branch -notmatch '^([0-9]{3})-') {
+        return $branchPath
+    }
+
+    $prefix = $matches[1]
+    $pattern = "{0}-*" -f $prefix
+    $matchingDirs = @(Get-ChildItem -Path $specsDir -Directory -Filter $pattern -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+
+    if ($matchingDirs.Count -eq 0) {
+        return $branchPath
+    }
+
+    if ($matchingDirs.Count -eq 1) {
+        return (Join-Path $specsDir $matchingDirs[0])
+    }
+
+    if ($matchingDirs -contains $Branch) {
+        Write-Warning "[specify] Warning: Multiple spec directories share prefix '$prefix'; using '$Branch'."
+        Write-Warning "[specify] Hint: Set SPECIFY_FEATURE=<directory> to target a different spec."
+        return $branchPath
+    }
+
+    $list = $matchingDirs -join ' '
+    $example = $matchingDirs[0]
+    throw ("ERROR: Multiple spec directories found with prefix '{0}': {1}`nSet SPECIFY_FEATURE to the directory you want to target (example: SPECIFY_FEATURE={2})." -f $prefix, $list, $example)
 }
 
 function Get-FeaturePathsEnv {

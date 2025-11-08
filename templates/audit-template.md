@@ -95,6 +95,16 @@ _(Append additional historical entries as needed.)_
 
 {STRENGTHS_SECTION}
 
+## Feedback Traceability
+
+> Summarize operator conversation feedback and its disposition.
+
+| Feedback Item | Source | Status | Evidence / Linked Findings |
+|---------------|--------|--------|----------------------------|
+| {FEEDBACK_ITEM_1} | {FEEDBACK_SOURCE_1} | {FEEDBACK_STATUS_1} | {FEEDBACK_EVIDENCE_1} |
+| {FEEDBACK_ITEM_2} | {FEEDBACK_SOURCE_2} | {FEEDBACK_STATUS_2} | {FEEDBACK_EVIDENCE_2} |
+| {FEEDBACK_ITEM_3} | {FEEDBACK_SOURCE_3} | {FEEDBACK_STATUS_3} | {FEEDBACK_EVIDENCE_3} |
+
 ## Outstanding Clarifications
 
 - [NEEDS CLARIFICATION: {CLARIFICATION_ITEM_1}]

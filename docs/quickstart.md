@@ -15,6 +15,7 @@ uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init 
 ```
 
 Pick script type explicitly (optional):
+
 ```bash
 uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME> --script ps  # Force PowerShell
 uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME> --script sh  # Force POSIX shell
