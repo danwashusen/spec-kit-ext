@@ -5,6 +5,7 @@ This guide shows how to iterate on the `specify-ext` CLI locally without publish
 > Scripts now have both Bash (`.sh`) and PowerShell (`.ps1`) variants. The CLI auto-selects based on OS unless you pass `--script sh|ps`.
 
 ## Development Workflow (Checklist)
+
 - Test the `specify-ext` CLI flows (`/specify`, `/plan`, `/tasks`) for your changes
 - Verify templates in `templates/` render and behave as expected
 - Test scripts in `scripts/` for both `sh` and `ps` variants where applicable
@@ -79,12 +80,14 @@ uvx --from /mnt/c/GitHub/spec-kit specify-ext init demo-anywhere --ai copilot --
 ```
 
 Set an environment variable for convenience:
+
 ```bash
 export SPEC_KIT_SRC=/mnt/c/GitHub/spec-kit
 uvx --from "$SPEC_KIT_SRC" specify-ext init demo-env --ai copilot --ignore-agent-tools --script ps
 ```
 
 (Optional) Define a shell function:
+
 ```bash
 specify-ext-dev() { uvx --from /mnt/c/GitHub/spec-kit specify-ext "$@"; }
 # Then
@@ -124,6 +127,7 @@ uvx --refresh --no-cache --from /abs/path/to/spec-kit \
 ```
 
 Notes:
+
 - Keep `--ai` and `--script` consistent with the ZIP variant you built.
 - On Linux, ensure `zip` is installed. On macOS, prefer the Docker method above.
 - Artifacts are git-ignored by default (`spec-kit-template-*-v*.zip`, `sdd-*-package-*`).
@@ -137,11 +141,13 @@ After running an `init`, check that shell scripts are executable on POSIX system
 ls -l scripts | grep .sh
 # Expect owner execute bit (e.g. -rwxr-xr-x)
 ```
+
 On Windows you will instead use the `.ps1` scripts (no chmod needed).
 
 ## 6. Run Lint / Basic Checks (Add Your Own)
 
 Currently no enforced lint config is bundled, but you can quickly sanity check importability:
+
 ```bash
 python -c "import specify_cli; print('Import OK')"
 ```
@@ -154,6 +160,7 @@ Validate packaging before publishing:
 uv build
 ls dist/
 ```
+
 Install the built artifact into a fresh throwaway environment if needed.
 
 ## 8. Using a Temporary Workspace
@@ -164,6 +171,7 @@ When testing `init --here` in a dirty directory, create a temp workspace:
 mkdir /tmp/spec-test && cd /tmp/spec-test
 python -m src.specify_cli init --here --ai claude --ignore-agent-tools --script sh  # if repo copied here
 ```
+
 Or copy only the modified CLI portion if you want a lighter sandbox.
 
 ## 9. Debug Network / TLS Skips
@@ -174,6 +182,7 @@ If you need to bypass TLS validation while experimenting:
 specify-ext check --skip-tls
 specify-ext init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
 ```
+
 (Use only for local experimentation.)
 
 ## 10. Rapid Edit Loop Summary
@@ -191,6 +200,7 @@ specify-ext init demo --skip-tls --ai gemini --ignore-agent-tools --script ps
 ## 11. Cleaning Up
 
 Remove build artifacts / virtual env quickly:
+
 ```bash
 rm -rf .venv dist build *.egg-info
 ```
@@ -224,12 +234,14 @@ Recommended asset naming (matches release packaging scripts):
 `spec-kit-template-<agent>-<script>-vX.Y.Z.zip` (e.g., `spec-kit-template-claude-sh-v0.0.1.zip`).
 
 Steps to distribute/test your fork:
+
 1. Fork this repo and push your changes.
 2. Build template archives using the release packaging script (see section 4b for examples).
 3. Draft a GitHub Release on your fork and upload the ZIP assets.
 4. Export env var overrides and run the CLI against your fork’s release.
 
 Bash/Zsh:
+
 ```bash
 export SPECIFY_REPO_OWNER=your-gh-username-or-org
 export SPECIFY_REPO_NAME=your-spec-kit-repo
@@ -240,6 +252,7 @@ specify-ext init my-forked-test --ai claude --script sh --ignore-agent-tools
 ```
 
 PowerShell:
+
 ```powershell
 $env:SPECIFY_REPO_OWNER = 'your-gh-username-or-org'
 $env:SPECIFY_REPO_NAME = 'your-spec-kit-repo'
@@ -250,6 +263,7 @@ specify-ext init my-forked-test --ai claude --script ps --ignore-agent-tools
 ```
 
 Notes:
+
 - If no asset matches, the CLI prints the available asset names—verify your filenames include `spec-kit-template-{ai}-{script}` and end with `.zip`.
 - Use `GITHUB_TOKEN` or `GH_TOKEN` for private forks or to avoid GitHub API rate limits.
 - Clear the overrides to return to upstream defaults:

@@ -7,6 +7,16 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.21] - 2025-11-09
+
+### Added
+
+- Restored Amp CLI metadata so `specify-ext init --ai amp` provisions `.agents/commands/` assets again, including packaging support and docs references.
+
+### Changed
+
+- `create-new-feature.sh` now scopes numbering per short name when scanning local/remote/spec directories while preserving Spec Kit Ext warnings and auto-generated short names (PowerShell implementation already aligned).
+
 ## [0.0.20] - 2025-10-15
 
 ### Added
@@ -15,13 +25,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default configuration snapshot (`config-default.yaml`) and richer command documentation so agents can load constitution, audit, and changelog context without manual setup.
 - Expanded documentation set covering configuration, command usage, and quickstart guidance for every slash command in the toolkit.
 - Intelligent branch naming in the `create-new-feature` scripts with `--short-name` support, semantic name generation, and GitHub-safe truncation to prevent duplicate branch numbers across local and remote repos.
+  - When `--short-name` is provided, the scripts clean and use that name directly.
+  - When omitted, the scripts generate names by stripping stop words, keeping uppercase acronyms, and selecting the 3–4 most meaningful words from the description.
+  - Enforces GitHub’s 244-byte limit with warnings and truncation at word boundaries so agents can safely generate names of any length.
+  - Example conversions:
+    - “I want to create user authentication” → `001-create-user-authentication`
+    - “Implement OAuth2 integration for API” → `001-implement-oauth2-integration-api`
+    - “Fix payment processing bug” → `001-fix-payment-processing`
 
 ### Changed
 
 - Renamed the published package and entry point to `specify-ext-cli` / `specify-ext` to avoid clashing with the upstream distribution and updated install instructions accordingly.
 - `/speckit.plan` workflow now pulls from `SPEC_KIT_CONFIG`, constitution, and changelog documents to ground design decisions in project governance.
 - CLI post-init messaging highlights the broader slash command suite to encourage end-to-end Spec-Driven Development adoption.
-- Updated `create-new-feature` help text and validation to explain new naming options while enforcing GitHub’s branch length constraints.
+- Updated `create-new-feature` help text and validation to explain the new naming options, share usage examples, and ensure GitHub’s branch length constraints are always enforced with automatic truncation.
 
 ## [0.0.19] - 2025-10-10
 

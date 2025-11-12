@@ -17,6 +17,7 @@ Spec-Driven Development **flips the script** on traditional software development
 ## Configuration
 
 Commands read configuration from `.specify.yaml` at your project root when present, or fallback to `config-default.yaml` otherwise. The default file includes:
+
 - A minimal active config (constitution path) to keep things zero‑config.
 - A commented full example showing how to reference architecture docs, front‑end specs, and other materials to enhance the workflow. This example is optional and not required.
 
@@ -114,6 +115,31 @@ Every slash command loads configuration (preferring `.specify.yaml`, falling bac
   - Produces a detailed review report following `/templates/review-template.md`, archives it to `specs/<feature>/review.md`, and injects follow-up tasks into `tasks.md` under **Phase 4.R: Review Follow-Up**.
 - **Outputs**: Governance-aligned `review.md`, augmented `tasks.md` with remediation tasks, and an audit trail of findings and strengths ready for release decisions.
 - **Notes**: It's possible to guide the audit process by first describing any issues, then initiating the audit process.
+
+## Experimental Goals
+
+### Technology Independence
+
+- Create applications using diverse technology stacks.
+- Validate the hypothesis that Spec-Driven Development is a process not tied to specific technologies, programming languages, or frameworks.
+
+### Enterprise Constraints
+
+- Demonstrate mission-critical application development.
+- Incorporate organizational constraints (cloud providers, tech stacks, engineering practices).
+- Support enterprise design systems and compliance requirements.
+
+### User-Centric Development
+
+- Build applications for different user cohorts and preferences.
+- Support various development approaches (from vibe-coding to AI-native development).
+
+### Creative & Iterative Processes
+
+- Validate the concept of parallel implementation exploration.
+- Provide robust iterative feature development workflows.
+- Extend processes to handle upgrades and modernization tasks.
+
 ## Contributing
 
 Please see our [Contributing Guide](https://github.com/github/spec-kit/blob/main/CONTRIBUTING.md) for information on how to contribute to this project.

@@ -84,14 +84,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Use standard REST/GraphQL patterns
    - Output OpenAPI/GraphQL schema to `/contracts/`
 
-3. **Agent context update**:
-   - Run `{AGENT_SCRIPT}`
-   - These scripts detect which AI agent is in use
-   - Update the appropriate agent-specific context file
-   - Add only new technology from current plan
-   - Preserve manual additions between markers
-
-4. **Author quickstart scenarios tied to reconnaissance**:
+3. **Author quickstart scenarios tied to reconnaissance**:
    - For each user story/decision, craft validation walkthroughs that cite the corresponding reconnaissance rows and list exact commands, data fixtures, configuration toggles, and rollback steps.
    - Highlight environment prerequisites (secrets, services, build targets) so implementers can exercise the touched modules without additional discovery.
 

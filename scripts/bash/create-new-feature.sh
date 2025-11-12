@@ -80,25 +80,45 @@ find_repo_root() {
     return 1
 }
 
-# Function to check existing branches (local and remote) and return next available number
+# Function to check existing branches (local, remote, specs/) and return next available number
 check_existing_branches() {
-    local _unused="${1:-}" # Retained for compatibility; numbering is now global
+    local short_name="${1:-}"
 
     # Fetch all remotes to get latest branch info (suppress errors if no remotes)
     git fetch --all --prune >/dev/null 2>&1 || true
-    
-    # Find all branches matching the numeric prefix pattern
-    local remote_branches
-    remote_branches=$(git ls-remote --heads origin 2>/dev/null | grep -E "refs/heads/[0-9]+-" | sed 's#.*/\([0-9]\+\)-.*#\1#' | sort -n)
-    
+
+    local remote_pattern="refs/heads/[0-9]+-"
+    local local_pattern="^[* ]*[0-9]+-"
+    local spec_pattern="[0-9][0-9][0-9]-*"
+
+    if [[ -n "$short_name" ]]; then
+        remote_pattern="refs/heads/[0-9]+-${short_name}$"
+        local_pattern="^[* ]*[0-9]+-${short_name}$"
+        spec_pattern="[0-9][0-9][0-9]-${short_name}"
+    fi
+
+    # Find matching branches on origin
+    local remote_branches=""
+    remote_branches=$(git ls-remote --heads origin 2>/dev/null \
+        | grep -E "$remote_pattern" \
+        | sed 's#.*/\([0-9]\+\)-.*#\1#' \
+        | sort -n || true)
+
     # Also check local branches
-    local local_branches
-    local_branches=$(git branch 2>/dev/null | grep -E "^[* ]*[0-9]+-" | sed 's/^[* ]*//' | sed 's/-.*//' | sort -n)
-    
+    local local_branches=""
+    local_branches=$(git branch 2>/dev/null \
+        | grep -E "$local_pattern" \
+        | sed 's/^[* ]*//' \
+        | sed 's/-.*//' \
+        | sort -n || true)
+
     # Check specs directory as well
     local spec_dirs=""
     if [ -d "$SPECS_DIR" ]; then
-        spec_dirs=$(find "$SPECS_DIR" -maxdepth 1 -mindepth 1 -type d -regex ".*/[0-9]+-.*" 2>/dev/null | xargs -n1 basename 2>/dev/null | sed 's/-.*//' | sort -n)
+        spec_dirs=$(find "$SPECS_DIR" -maxdepth 1 -type d -name "$spec_pattern" 2>/dev/null \
+            | xargs -n1 basename 2>/dev/null \
+            | sed 's/-.*//' \
+            | sort -n || true)
     fi
     
     # Combine all sources and get the highest number

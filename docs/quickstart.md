@@ -12,7 +12,7 @@ Initialize your project depending on the coding agent you're using:
 
 ```bash
 uvx --from git+https://github.com/danwashusen/spec-kit-ext.git specify-ext init <PROJECT_NAME>
-```
+```yaml
 
 Pick script type explicitly (optional):
 
@@ -46,10 +46,9 @@ spec-kit:
         context: Flag any drift from product requirements.
       - path: docs/architecture.md
         context: Highlight conflicts with approved architecture decisions.
-```
+```yaml
 
 Missing files are skipped automatically; the agent will highlight anything it expected but couldn't read. See [docs/configuration.md](./configuration.md) for the full schema.
-```
 
 ### 2. Create the Spec
 

@@ -64,19 +64,20 @@ See `docs/local-development.md` for up-to-date, end-to-end instructions. When wo
 
 ### Testing template and command changes locally
 
-Running `uv run specify init` pulls released packages, which won’t include your local changes.  
+Running `uv run specify-ext init` pulls released packages, which won’t include your local changes.  
 To test your templates, commands, and other changes locally, follow these steps:
 
 1. **Create release packages**
 
    Run the following command to generate the local packages:
-   ```
+
+   ```bash
    ./.github/workflows/scripts/create-release-packages.sh v1.0.0
    ```
 
 2. **Copy the relevant package to your test project**
 
-   ```
+   ```bash
    cp -r .genreleases/sdd-copilot-package-sh/. <path-to-test-project>/
    ```
 

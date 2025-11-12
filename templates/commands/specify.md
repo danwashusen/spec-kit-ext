@@ -31,7 +31,6 @@ Given that feature description, do this:
    - Automatically selects the next available feature number unless you explicitly pass overrides.
   **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output—always refer to it to get the actual content you're looking for. For single quotes in args like "I'm Groot", use escape syntax: e.g. `'I'\''m Groot'` (or double-quote if possible: `"I'm Groot"`).
 3. Load `templates/spec-template.md` to understand required sections.
-
 4. Follow this execution flow:
 
     1. Parse user description from Input

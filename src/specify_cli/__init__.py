@@ -142,6 +142,12 @@ AGENT_CONFIG = {
         "install_url": None,  # IDE-based
         "requires_cli": False,
     },
+    "amp": {
+        "name": "Amp",
+        "folder": ".agents/commands/",
+        "install_url": "https://ampcode.com/manual#install",
+        "requires_cli": True,
+    },
     "q": {
         "name": "Amazon Q Developer CLI",
         "folder": ".amazonq/",

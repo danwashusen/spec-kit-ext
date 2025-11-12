@@ -257,8 +257,6 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
-<<<<<<< HEAD
-
 ## Validation Checklist
 *GATE: Checked by `/speckit.tasks` before returning*
 
@@ -274,5 +272,3 @@ With multiple developers:
 - Use this section to log assumptions made while generating tasks.
 - Format entries as: `- Assumption: ...  Rationale: ...`
 - Keep the list current so implementers understand contextual decisions.
-=======
->>>>>>> upstream/main

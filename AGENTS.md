@@ -46,6 +46,7 @@ Specify supports multiple AI agents by generating agent-specific command files a
 | **Roo Code** | `.roo/rules/` | Markdown | N/A (IDE-based) | Roo Code IDE |
 | **CodeBuddy CLI** | `.codebuddy/commands/` | Markdown | `codebuddy` | CodeBuddy CLI |
 | **Amazon Q Developer CLI** | `.amazonq/prompts/` | Markdown | `q` | Amazon Q Developer CLI |
+| **Amp** | `.agents/commands/` | Markdown | `amp` | Amp CLI |
 
 ### Step-by-Step Integration Guide
 
@@ -261,6 +262,7 @@ Require a command-line tool to be installed:
 - **opencode**: `opencode` CLI
 - **Amazon Q Developer CLI**: `q` CLI
 - **CodeBuddy CLI**: `codebuddy` CLI
+- **Amp**: `amp` CLI
 
 ### IDE-Based Agents
 
@@ -273,7 +275,7 @@ Work within integrated development environments:
 
 ### Markdown Format
 
-Used by: Claude, Cursor, opencode, Windsurf, Amazon Q Developer
+Used by: Claude, Cursor, opencode, Windsurf, Amazon Q Developer, Amp
 
 ```markdown
 ---

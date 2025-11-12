@@ -34,15 +34,15 @@ You **MUST** consider the user input before proceeding (if not empty).
      ```
 
    - Calculate overall status:
-     * **PASS**: All checklists have 0 incomplete items
-     * **FAIL**: One or more checklists have incomplete items
+     - **PASS**: All checklists have 0 incomplete items
+     - **FAIL**: One or more checklists have incomplete items
 
    - **If any checklist is incomplete**:
-     * Display the table with incomplete item counts
-     * **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
-     * Wait for user response before continuing
-     * If user says "no" or "wait" or "stop", halt execution
-     * If user says "yes" or "proceed" or "continue", proceed to step 3
+     - Display the table with incomplete item counts
+     - **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
+     - Wait for user response before continuing
+     - If user says "no" or "wait" or "stop", halt execution
+     - If user says "yes" or "proceed" or "continue", proceed to step 3
 
    - **If all checklists are complete**:
      - Display the table showing all checklists passed
@@ -73,7 +73,7 @@ You **MUST** consider the user input before proceeding (if not empty).
      ```
 
    - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
-   - Check if eslint.config.* exists → ensure the config's `ignores` entries cover required patterns
+   - If `.eslintrc*` or `eslint.config.*` exists → ensure the config's `ignores` entries cover required patterns and create/update `.eslintignore` when the toolchain requires a separate file
    - Check if .prettierrc* exists → create/verify .prettierignore
    - Check if .npmrc or package.json exists → create/verify .npmignore (if publishing)
    - Check if terraform files (*.tf) exist → create/verify .terraformignore

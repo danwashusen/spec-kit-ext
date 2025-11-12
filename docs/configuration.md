@@ -5,6 +5,7 @@ Spec Kit supports external configuration that all slash commands read at startup
 ## Lookup Order
 
 When a command runs, it loads configuration in this order:
+
 - `.specify.yaml` at the repository root (if present)
 - `config-default.yaml` at the repository root (fallback)
 
@@ -14,8 +15,9 @@ If neither file is present, commands rely on hardcoded defaults in templates whe
 
 - `.specify.yaml` — Your project‑specific configuration. Commit this to your repo if you want to customize behavior.
 - `config-default.yaml` — Ships with Spec Kit. Contains:
-- A minimal active default (sets only the constitution path) to keep projects zero‑config.
-- A commented, full example demonstrating how to reference architecture docs, front‑end specs, and other documents. This example is an enhancement/extension and is not required.
+
+  - A minimal active default (sets only the constitution path) to keep projects zero‑config.
+  - A commented, full example demonstrating how to reference architecture docs, front‑end specs, and other documents. This example is an enhancement/extension and is not required.
 
 ## Schema Overview
 
@@ -75,6 +77,7 @@ spec-kit:
 ```
 
 Notes:
+
 - Paths are resolved relative to the repository root.
 - Missing optional files are noted and skipped by the agent.
 - The commented example above mirrors the structure demonstrated in `config-default.yaml` and is meant as an enhancement; you do not need to include any of it to use Spec Kit.
